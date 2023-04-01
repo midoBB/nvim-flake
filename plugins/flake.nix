@@ -26,12 +26,12 @@
     };
 
     yanky = {
-      url = "github:gbprod/yanky.nvim/8cd75ca00a88a3c68385363e981783e0689dada1";
+      url = "github:gbprod/yanky.nvim";
       flake = false;
     };
 
     cutlass = {
-      url = "github:gbprod/cutlass.nvim/9d5c8a92a6ff1e4c3776b7c90b050efbc3fe2b7f";
+      url = "github:gbprod/cutlass.nvim";
       flake = false;
     };
 
@@ -79,27 +79,27 @@
   outputs = inputs:
     let
       missingVimPluginsInNixpkgs = pkgs: {
-        oxocarbon = pkgs.vimUtils.buildVimPlugin {
+        oxocarbon = pkgs.vimUtils.buildVimPluginFrom2Nix {
           name = "oxocarbon";
           src = inputs.oxocarbon;
         };
 
-        nvim-lspsaga = pkgs.vimUtils.buildVimPlugin {
+        nvim-lspsaga = pkgs.vimUtils.buildVimPluginFrom2Nix {
           name = "lspsaga";
           src = inputs.nvim-lspsaga;
         };
 
-        nvim-sqls = pkgs.vimUtils.buildVimPlugin {
+        nvim-sqls = pkgs.vimUtils.buildVimPluginFrom2Nix {
           name = "sqls";
           src = inputs.nvim-sqls;
         };
 
-        splitjoin = pkgs.vimUtils.buildVimPlugin {
+        splitjoin = pkgs.vimUtils.buildVimPluginFrom2Nix {
           name = "splitjoin.nvim";
           src = inputs.splitjoin;
         };
 
-        hlargs = pkgs.vimUtils.buildVimPlugin {
+        hlargs = pkgs.vimUtils.buildVimPluginFrom2Nix {
           name = "hlargs.nvim";
           src = inputs.hlargs;
         };
@@ -109,32 +109,32 @@
           src = inputs.yanky;
         };
 
-        cutlass = pkgs.vimUtils.buildVimPluginFrom2Nix {
+        cutlass = pkgs.vimUtils.buildVimPluginFrom2Nix{
           name = "cutlass.nvim";
           src = inputs.cutlass;
         };
 
-        search-replace = pkgs.vimUtils.buildVimPlugin {
+        search-replace = pkgs.vimUtils.buildVimPluginFrom2Nix {
           name = "search-replace.nvim";
           src = inputs.search-replace;
         };
 
-        neovim-session-manager = pkgs.vimUtils.buildVimPlugin {
+        neovim-session-manager = pkgs.vimUtils.buildVimPluginFrom2Nix {
           name = "neovim-session-manager";
           src = inputs.neovim-session-manager;
         };
 
-        tabout = pkgs.vimUtils.buildVimPlugin {
+        tabout = pkgs.vimUtils.buildVimPluginFrom2Nix {
           name = "tabout.nvim";
           src = inputs.tabout;
         };
 
-        reticle = pkgs.vimUtils.buildVimPlugin {
+        reticle = pkgs.vimUtils.buildVimPluginFrom2Nix {
           name = "reticle.nvim";
           src = inputs.reticle;
         };
 
-        bufferline-cycle-windowless = pkgs.vimUtils.buildVimPlugin {
+        bufferline-cycle-windowless = pkgs.vimUtils.buildVimPluginFrom2Nix {
           name = "bufferline-cycle-windowless.nvim";
           src = inputs.bufferline-cycle-windowless;
         };
@@ -144,7 +144,7 @@
         src = inputs.incline;
         };
 
-        persistent-breakpoints = pkgs.vimUtils.buildVimPlugin {
+        persistent-breakpoints = pkgs.vimUtils.buildVimPluginFrom2Nix {
           name = "persistent-breakpoints.nvim";
           src = inputs.persistent-breakpoints;
         };

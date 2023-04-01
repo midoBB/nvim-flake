@@ -19,17 +19,16 @@
     "cutlass": {
       "flake": false,
       "locked": {
-        "lastModified": 1674558894,
-        "narHash": "sha256-NCIVnc6pOZPYtXgk+diTHQQi/VyWYbwE9WItj+DcFQQ=",
+        "lastModified": 1674752172,
+        "narHash": "sha256-Bmf5qTLdCTOXbGMjVb4vsj6qkN4nL0LtmUwZF3rl0zc=",
         "owner": "gbprod",
         "repo": "cutlass.nvim",
-        "rev": "9d5c8a92a6ff1e4c3776b7c90b050efbc3fe2b7f",
+        "rev": "31a2099627cd1ef8898f442ee6a58c7400111395",
         "type": "github"
       },
       "original": {
         "owner": "gbprod",
         "repo": "cutlass.nvim",
-        "rev": "9d5c8a92a6ff1e4c3776b7c90b050efbc3fe2b7f",
         "type": "github"
       }
     },
@@ -140,11 +139,11 @@
     "nvim-lspsaga": {
       "flake": false,
       "locked": {
-        "lastModified": 1680096153,
-        "narHash": "sha256-tcvpDHGFV7elpy8af/EOsIRyvaqEqLTF/dEWCTSBaSY=",
+        "lastModified": 1680312397,
+        "narHash": "sha256-4s3WMCVsqBP+XFnj/ZA+QvuwYW53veGPhhGhZNBQ4qo=",
         "owner": "glepnir",
         "repo": "lspsaga.nvim",
-        "rev": "abb0e427ffd70cb5b240f17d996b7c84cd55d001",
+        "rev": "ba8ad94b42a9a807c2ab0b4545c098f0b513f3f4",
         "type": "github"
       },
       "original": {
@@ -308,7 +307,7 @@
       },
       "locked": {
         "lastModified": 1,
-        "narHash": "sha256-Ss7UjNokjjZwFjA9ptdAaO687yEdsCbrm6qoELKBXMA=",
+        "narHash": "sha256-I7Fmsmi9tkK6hZlwZN+un10h1J4G7eJqGa0NwpHd8sw=",
         "path": "./plugins",
         "type": "path"
       },
@@ -320,17 +319,16 @@
     "yanky": {
       "flake": false,
       "locked": {
-        "lastModified": 1674751824,
-        "narHash": "sha256-XY7mpiD6baNaDwgG+xrU3K02tfw07skW7r65NoTKvJs=",
+        "lastModified": 1678349903,
+        "narHash": "sha256-EcdC9HTWB/r6W6U6Ad808aaZPwzRnxfGQ/fSrsy11gI=",
         "owner": "gbprod",
         "repo": "yanky.nvim",
-        "rev": "8cd75ca00a88a3c68385363e981783e0689dada1",
+        "rev": "c4c794afd762a00ca543972e5b9e34ce9aa14a87",
         "type": "github"
       },
       "original": {
         "owner": "gbprod",
         "repo": "yanky.nvim",
-        "rev": "8cd75ca00a88a3c68385363e981783e0689dada1",
         "type": "github"
       }
     }

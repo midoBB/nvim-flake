@@ -88,9 +88,6 @@ with pkgs.vimPlugins; [
   nvim-navic
   aerial-nvim
   inc-rename-nvim
-  #Golang
-  nvim-dap-go
-  go-nvim
   # Programming : Language support
   #SQL
   nvim-sqls
