@@ -1,4 +1,4 @@
---jjjjjjjjjjjjjjjj # vim:fileencoding=utf-8:ft=lua:foldmethod=marker
+-- # vim:fileencoding=utf-8:ft=lua:foldmethod=marker
 -- Helper functions {{{
 function OpenQF()
     local qf_name = "quickfix"
@@ -66,6 +66,7 @@ function ToggleQF(type)
         end
     end
 end
+
 function map(mode, lhs, rhs, opts)
     local options = {
         noremap = true,
@@ -76,6 +77,7 @@ function map(mode, lhs, rhs, opts)
     end
     vim.api.nvim_set_keymap(mode, lhs, rhs, options)
 end
+
 -- }}}
 -- Opts {{{
 vim.g.mapleader = " "
@@ -148,8 +150,7 @@ local options = {
         tab = ">·",
         trail = "~",
         extends = ">",
-        precedes = "<",
-        space = "."
+        precedes = "<"
     },
     fillchars = {
         vert = "█",
@@ -181,12 +182,12 @@ for name, value in pairs(options) do
     vim.opt[name] = value
 end
 
-vim.opt.wildignore:append({"*.o", "*~", "*.pyc", "*pycache*", "*.lock"})
+vim.opt.wildignore:append({ "*.o", "*~", "*.pyc", "*pycache*", "*.lock" })
 -- -- Disable builtin plugins
-local disabled_built_ins = {"2html_plugin", "getscript", "getscriptPlugin", "gzip", "logipat", "netrw", "netrwPlugin",
-                            "netrwSettings", "netrwFileHandlers", "matchit", "tar", "tarPlugin", "rrhelper",
-                            "spellfile_plugin", "vimball", "vimballPlugin", "zip", "zipPlugin", "tutor", "rplugin",
-                            "synmenu", "optwin", "compiler", "bugreport", "ftplugin"}
+local disabled_built_ins = { "2html_plugin", "getscript", "getscriptPlugin", "gzip", "logipat", "netrw", "netrwPlugin",
+    "netrwSettings", "netrwFileHandlers", "matchit", "tar", "tarPlugin", "rrhelper",
+    "spellfile_plugin", "vimball", "vimballPlugin", "zip", "zipPlugin", "tutor", "rplugin",
+    "synmenu", "optwin", "compiler", "bugreport", "ftplugin" }
 
 for _, plugin in pairs(disabled_built_ins) do
     vim.g["loaded_" .. plugin] = 1
@@ -214,15 +215,15 @@ require("noice").setup({
         inc_rename = true,
         lsp_doc_border = true
     },
-  messages = {
-    enabled = true, -- enables the Noice messages UI
-    view = "mini", -- default view for messages
-    view_error = "mini", -- view for errors
-    view_warn = "mini", -- view for warnings
-    view_history = "messages", -- view for :messages
-    view_search = "virtualtext", -- view for search count messages. Set to `false` to disable
-  },
-    routes = {{
+    messages = {
+        enabled = true,              -- enables the Noice messages UI
+        view = "mini",               -- default view for messages
+        view_error = "mini",         -- view for errors
+        view_warn = "mini",          -- view for warnings
+        view_history = "messages",   -- view for :messages
+        view_search = "virtualtext", -- view for search count messages. Set to `false` to disable
+    },
+    routes = { {
         filter = {
             event = "msg_show",
             kind = "*"
@@ -239,16 +240,52 @@ require("noice").setup({
         opts = {
             skip = true
         }
-    }}
+    } }
 })
 require("dressing").setup({
     input = {
         relative = "editor"
     },
     select = {
-        backend = {"telescope", "fzf", "builtin"}
+        backend = { "telescope", "fzf", "builtin" }
     }
 })
+
+vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
+    border = "rounded"
+})
+vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
+    border = "rounded"
+})
+vim.diagnostic.config({
+    underline = true,
+    update_in_insert = true,
+    virtual_text = {
+        source = "always", -- Or "if_many"
+        prefix = "●"     -- Could be '■', '▎', 'x'
+    },
+    severity_sort = true,
+    float = {
+        source = "always", -- Or "if_many"
+        border = "rounded",
+        style = "minimal"
+    }
+})
+
+local signs = {
+    Error = "",
+    Warn = "",
+    Hint = "",
+    Info = ""
+}
+for type, icon in pairs(signs) do
+    local hl = "DiagnosticSign" .. type
+    vim.fn.sign_define(hl, {
+        text = icon,
+        texthl = hl,
+        numhl = ""
+    })
+end
 -- }}}
 -- NvimTree {{{
 require("nvim-tree").setup({
@@ -277,9 +314,8 @@ require('telescope').setup({
         --[[ layout_strategy = "center", ]]
         prompt_prefix = " ",
         selection_caret = " ",
-        path_display = {"smart"},
-        file_ignore_patterns = {".git/", "node_modules"},
-
+        path_display = { "smart" },
+        file_ignore_patterns = { ".git/", "node_modules" },
         mappings = {
             i = {
                 ["<C-j>"] = require("telescope.actions").move_selection_next,
@@ -287,20 +323,18 @@ require('telescope').setup({
             }
         }
     },
-
     extensions = {
         fzf = {
-            fuzzy = true, -- false will only do exact matching
+            fuzzy = true,                   -- false will only do exact matching
             override_generic_sorter = true, -- override the generic sorter
-            override_file_sorter = false, -- override the file sorter
-            case_mode = "smart_case" -- or "ignore_case" or "respect_case"
+            override_file_sorter = false,   -- override the file sorter
+            case_mode = "smart_case"        -- or "ignore_case" or "respect_case"
         },
         fzy_native = {
             override_generic_sorter = false,
             override_file_sorter = true
         }
     }
-
 })
 require('telescope').load_extension("fzf")
 require('telescope').load_extension('fzy_native')
@@ -308,7 +342,7 @@ require('telescope').load_extension("aerial")
 -- }}}
 -- Indentation {{{
 local hl_list = {}
-for i, color in pairs({'#E06C75', '#E5C07B', '#98C379', '#56B6C2', '#61AFEF', '#C678DD'}) do
+for i, color in pairs({ '#E06C75', '#E5C07B', '#98C379', '#56B6C2', '#61AFEF', '#C678DD' }) do
     local name = 'IndentBlanklineIndent' .. i
     vim.api.nvim_set_hl(0, name, {
         fg = color
@@ -370,7 +404,7 @@ require("nvim-treesitter.configs").setup({
     },
     highlight = {
         enable = true,
-        disable = {"comment"}
+        disable = { "comment" }
     }
 })
 
@@ -408,7 +442,7 @@ vim.api.nvim_create_augroup("bufcheck", {
 -- start git messages in insert mode
 vim.api.nvim_create_autocmd("FileType", {
     group = "bufcheck",
-    pattern = {"gitcommit", "gitrebase"},
+    pattern = { "gitcommit", "gitrebase" },
     command = "startinsert | 1"
 })
 
@@ -434,7 +468,7 @@ vim.api.nvim_create_augroup("setLineLength", {
 })
 vim.api.nvim_create_autocmd("Filetype", {
     group = "setLineLength",
-    pattern = {"text", "markdown", "html", "xhtml", "javascript", "typescript"},
+    pattern = { "text", "markdown", "html", "xhtml", "javascript", "typescript" },
     command = "setlocal cc=0"
 })
 
@@ -444,7 +478,7 @@ vim.api.nvim_create_augroup("setIndent", {
 })
 vim.api.nvim_create_autocmd("Filetype", {
     group = "setIndent",
-    pattern = {"xml", "html", "xhtml", "css", "scss", "javascript", "typescript", "yaml", "lua"},
+    pattern = { "xml", "html", "xhtml", "css", "scss", "javascript", "typescript", "yaml", "lua" },
     command = "setlocal shiftwidth=2 tabstop=2"
 })
 
@@ -453,18 +487,18 @@ vim.api.nvim_create_augroup("General", {
 })
 vim.api.nvim_create_autocmd("BufWritePost", {
     group = "General",
-    pattern = {"*.{,z,ba}sh", "*.pl", "*.py"},
+    pattern = { "*.{,z,ba}sh", "*.pl", "*.py" },
     desc = "Make files executable",
     callback = function()
-        vim.fn.system({"chmod", "+x", vim.fn.expand("%")})
+        vim.fn.system({ "chmod", "+x", vim.fn.expand("%") })
     end
 })
 
 -- Return to last edit position when opening files
 
 require("nvim-lastplace").setup({
-    lastplace_ignore_buftype = {"quickfix", "nofile", "help"},
-    lastplace_ignore_filetype = {"gitcommit", "gitrebase", "svn", "hgcommit"},
+    lastplace_ignore_buftype = { "quickfix", "nofile", "help" },
+    lastplace_ignore_filetype = { "gitcommit", "gitrebase", "svn", "hgcommit" },
     lastplace_open_folds = true
 })
 require("session_manager").setup({
@@ -489,10 +523,9 @@ vim.cmd([[
     end,
     group = "bufcheck"
 }) ]]
-
 -- close some filetypes with <q>
 vim.api.nvim_create_autocmd("FileType", {
-    pattern = {"qf", "help", "man", "notify", "lspinfo", "spectre_panel", "startuptime"},
+    pattern = { "qf", "help", "man", "notify", "lspinfo", "spectre_panel", "startuptime" },
     callback = function(event)
         vim.bo[event.buf].buflisted = false
         vim.keymap.set("n", "q", "<cmd>close<cr>", {
@@ -521,7 +554,7 @@ require("yanky").setup({
 
 require("cutlass").setup({
     cut_key = "m",
-    exclude = {"ns", "nS"}
+    exclude = { "ns", "nS" }
 })
 
 -- }}}
@@ -651,133 +684,133 @@ map("n", "gj", "<cmd>lua require('splitjoin').join()<cr>", {
 map("n", "g,", "<cmd>lua require('splitjoin').split()<cr>", {
     desc = "Split the object under cursor"
 })
-whichkey = require("which-key")
+local whichkey = require("which-key")
 local conf = {
-	window = {
-		border = "single", -- none, single, double, shadow
-		position = "bottom", -- bottom, top
-	},
+    window = {
+        border = "single",   -- none, single, double, shadow
+        position = "bottom", -- bottom, top
+    },
 }
 
 local opts = {
-	mode = "n", -- Normal mode
-	prefix = "<leader>",
-	buffer = nil, -- Global mappings. Specify a buffer number for buffer local mappings
-	silent = true, -- use `silent` when creating keymaps
-	noremap = true, -- use `noremap` when creating keymaps
-	nowait = false, -- use `nowait` when creating keymaps
+    mode = "n",     -- Normal mode
+    prefix = "<leader>",
+    buffer = nil,   -- Global mappings. Specify a buffer number for buffer local mappings
+    silent = true,  -- use `silent` when creating keymaps
+    noremap = true, -- use `noremap` when creating keymaps
+    nowait = false, -- use `nowait` when creating keymaps
 }
 
 local mappings = {
-	["e"] = { "<cmd>NvimTreeToggle<cr>", "Explorer" },
-	["p"] = { '"+gp', "Paste from clipboard" },
-	["y"] = { '"+y', "Copy to clipboard" },
-	["w"] = { "<cmd>update!<CR>", "Save" },
-	["<leader>q"] = { "<cmd>qa<CR>", "Quit" },
-	["q"] = { "<cmd>BufDel<CR>", "Close the current buffer" },
-	b = {
-		name = "+Buffer",
-		c = { "<cmd>BufDelOthers<CR>", "Close the other buffers" },
-		f = { "<cmd>Telescope buffers<cr>", "Find buffer" },
-	},
-	d = {
-		name = "+Debugging",
-		b = { "<cmd>lua require'dap'.toggle_breakpoint()<cr>", "Toggle breakpoint" },
-		i = { "<cmd>lua require'dap'.step_into()<cr>", "Step into" },
-		o = { "<cmd>lua require'dap'.step_over()<cr>", "Step over" },
-		O = { "<cmd>lua require'dap'.step_out()<cr>", "Step out" },
-		I = {
-			"<cmd>lua require'dap.ui.widgets'.hover()<cr>",
-			"Inspect variable under cursor",
-		},
-		S = {
-			"<cmd>lua local w=require'dap.ui.widgets';w.centered_float(w.scopes)<cr>",
-			"Show Scopes",
-		},
-		s = { "<cmd>lua require'dap'.continue()<cr>", "Start debugging" },
-		t = { "<cmd>lua require'dap'.terminate()<cr>", "Terminate debugging" },
-		f = { "<cmd>lua require'dap'.close()<cr>", "Finish debugging" },
-		j = { "<cmd>lua require'dap'.down()<cr>", "Go down in call stack" },
-		k = { "<cmd>lua require'dap'.up()<cr>", "Go up in call stack" },
-	},
-	f = {
-		name = "+Find",
-		f = { "<cmd>Telescope find_files<cr>", "Find File" },
-		g = { "<cmd>Telescope live_grep<cr>", "Find text" },
-		p = { "<cmd>Telescope projects<CR>", "Find project" },
-		r = { "<cmd>Telescope oldfiles<CR>", "Recent files" },
-		b = { "<cmd>Telescope buffers<cr>", "Open Buffers" },
-		c = { "<cmd>Telescope command_history<cr>", "Previous commands" },
-		C = { "<cmd>Telescope commands<cr>", "Available commands" },
-		h = { "<cmd>Cheatsheet<cr>", "Help Tags" },
-		H = { "<cmd>Telescope help_tags<cr>", "Help Tags" },
-		j = { "<cmd>Telescope jumplist<cr>", "Jump List" },
-		m = { "<cmd>Telescope marks<cr>", "Marks" },
-		R = { "<cmd>Telescope registers<cr>", "Registers" },
-		t = { "<cmd>Telescope live_grep<cr>", "Text" },
-		T = { "<cmd>TodoTelescope<cr>", "Todos" },
-	},
-	s = {
-		name = "+Split",
-		s = { "<cmd>split<CR>", "Split hortizentally" },
-		v = { "<cmd>vsplit<CR>", "Split Vertically" },
-		c = { "<cmd>close<CR>", "Close Split" },
-	},
-	g = {
-		name = "+Go to",
-		f = { "<cmd>NvimTreeToggle<cr>", "file system" },
-		g = { "<cmd>Neogit<CR>", "Git" },
-		y = { "<cmd>YankyRingHistory<cr>", "Clipboard History" },
-		i = { "<cmd>Trouble workspace_diagnostics<cr>", "Workspace issues" },
-		t = { "<cmd>TodoTrouble<cr>", "Todos" },
-		u = { "<cmd>UndotreeToggle<cr>", "Undo tree" },
-	},
-	h = {
-		name = "+Git",
-		n = { "<cmd>Gitsigns next_hunk<cr>", "Next hunk" },
-		p = { "<cmd>Gitsigns prev_hunk<cr>", "Previous hunk" },
-		s = { "<cmd>Gitsigns stage_hunk<cr>", "Stage hunk" },
-		r = { "<cmd>Gitsigns reset_hunk<cr>", "Reset hunk" },
-		u = { "<cmd>Gitsigns undo_stage_hunk<cr>", "Undo stage hunk" },
-		S = { "<cmd>Gitsigns stage_buffer<cr>", "Stage buffer" },
-		R = { "<cmd>Gitsigns reset_buffer<cr>", "Reset buffer" },
-		P = { "<cmd>Gitsigns preview_hunk_inline<cr>", "Preview Hunk" },
-		b = { "<cmd>Gitsigns blame_line<cr>", "Git blame" },
-	},
-	m = {
-		name = "+Harpoon",
-		a = { '<cmd>lua require("harpoon.mark").add_file()<cr>', "Add File" },
-		m = { '<cmd>lua require("harpoon.ui").toggle_quick_menu()<cr>', "Menu" },
-	},
-	c = {
-		name = "+Coding",
-		A = {
-			name = "Annotate",
-			f = { "<cmd>Neogen func<cr>", "Annotate function" },
-			c = { "<cmd>Neogen class<cr>", "Annotate class" },
-			t = { "<cmd>Neogen type<cr>", "Annotate type" },
-			F = { "<cmd>Neogen file<cr>", "Annotate File" },
-		},
-	},
+    ["e"] = { "<cmd>NvimTreeToggle<cr>", "Explorer" },
+    ["p"] = { '"+gp', "Paste from clipboard" },
+    ["y"] = { '"+y', "Copy to clipboard" },
+    ["w"] = { "<cmd>update!<CR>", "Save" },
+    ["<leader>q"] = { "<cmd>qa<CR>", "Quit" },
+    ["q"] = { "<cmd>BufDel<CR>", "Close the current buffer" },
+    b = {
+        name = "+Buffer",
+        c = { "<cmd>BufDelOthers<CR>", "Close the other buffers" },
+        f = { "<cmd>Telescope buffers<cr>", "Find buffer" },
+    },
+    d = {
+        name = "+Debugging",
+        b = { "<cmd>lua require'dap'.toggle_breakpoint()<cr>", "Toggle breakpoint" },
+        i = { "<cmd>lua require'dap'.step_into()<cr>", "Step into" },
+        o = { "<cmd>lua require'dap'.step_over()<cr>", "Step over" },
+        O = { "<cmd>lua require'dap'.step_out()<cr>", "Step out" },
+        I = {
+            "<cmd>lua require'dap.ui.widgets'.hover()<cr>",
+            "Inspect variable under cursor",
+        },
+        S = {
+            "<cmd>lua local w=require'dap.ui.widgets';w.centered_float(w.scopes)<cr>",
+            "Show Scopes",
+        },
+        s = { "<cmd>lua require'dap'.continue()<cr>", "Start debugging" },
+        t = { "<cmd>lua require'dap'.terminate()<cr>", "Terminate debugging" },
+        f = { "<cmd>lua require'dap'.close()<cr>", "Finish debugging" },
+        j = { "<cmd>lua require'dap'.down()<cr>", "Go down in call stack" },
+        k = { "<cmd>lua require'dap'.up()<cr>", "Go up in call stack" },
+    },
+    f = {
+        name = "+Find",
+        f = { "<cmd>Telescope find_files<cr>", "Find File" },
+        g = { "<cmd>Telescope live_grep<cr>", "Find text" },
+        p = { "<cmd>Telescope projects<CR>", "Find project" },
+        r = { "<cmd>Telescope oldfiles<CR>", "Recent files" },
+        b = { "<cmd>Telescope buffers<cr>", "Open Buffers" },
+        c = { "<cmd>Telescope command_history<cr>", "Previous commands" },
+        C = { "<cmd>Telescope commands<cr>", "Available commands" },
+        h = { "<cmd>Cheatsheet<cr>", "Help Tags" },
+        H = { "<cmd>Telescope help_tags<cr>", "Help Tags" },
+        j = { "<cmd>Telescope jumplist<cr>", "Jump List" },
+        m = { "<cmd>Telescope marks<cr>", "Marks" },
+        R = { "<cmd>Telescope registers<cr>", "Registers" },
+        t = { "<cmd>Telescope live_grep<cr>", "Text" },
+        T = { "<cmd>TodoTelescope<cr>", "Todos" },
+    },
+    s = {
+        name = "+Split",
+        s = { "<cmd>split<CR>", "Split hortizentally" },
+        v = { "<cmd>vsplit<CR>", "Split Vertically" },
+        c = { "<cmd>close<CR>", "Close Split" },
+    },
+    g = {
+        name = "+Go to",
+        f = { "<cmd>NvimTreeToggle<cr>", "file system" },
+        g = { "<cmd>Neogit<CR>", "Git" },
+        y = { "<cmd>YankyRingHistory<cr>", "Clipboard History" },
+        i = { "<cmd>Trouble workspace_diagnostics<cr>", "Workspace issues" },
+        t = { "<cmd>TodoTrouble<cr>", "Todos" },
+        u = { "<cmd>UndotreeToggle<cr>", "Undo tree" },
+    },
+    h = {
+        name = "+Git",
+        n = { "<cmd>Gitsigns next_hunk<cr>", "Next hunk" },
+        p = { "<cmd>Gitsigns prev_hunk<cr>", "Previous hunk" },
+        s = { "<cmd>Gitsigns stage_hunk<cr>", "Stage hunk" },
+        r = { "<cmd>Gitsigns reset_hunk<cr>", "Reset hunk" },
+        u = { "<cmd>Gitsigns undo_stage_hunk<cr>", "Undo stage hunk" },
+        S = { "<cmd>Gitsigns stage_buffer<cr>", "Stage buffer" },
+        R = { "<cmd>Gitsigns reset_buffer<cr>", "Reset buffer" },
+        P = { "<cmd>Gitsigns preview_hunk_inline<cr>", "Preview Hunk" },
+        b = { "<cmd>Gitsigns blame_line<cr>", "Git blame" },
+    },
+    m = {
+        name = "+Harpoon",
+        a = { '<cmd>lua require("harpoon.mark").add_file()<cr>', "Add File" },
+        m = { '<cmd>lua require("harpoon.ui").toggle_quick_menu()<cr>', "Menu" },
+    },
+    c = {
+        name = "+Coding",
+        A = {
+            name = "Annotate",
+            f = { "<cmd>Neogen func<cr>", "Annotate function" },
+            c = { "<cmd>Neogen class<cr>", "Annotate class" },
+            t = { "<cmd>Neogen type<cr>", "Annotate type" },
+            F = { "<cmd>Neogen file<cr>", "Annotate File" },
+        },
+    },
 }
 
 local vopts = {
-	mode = "v", -- Normal mode
-	prefix = "<leader>",
-	buffer = nil, -- Global mappings. Specify a buffer number for buffer local mappings
-	silent = true, -- use `silent` when creating keymaps
-	noremap = true, -- use `noremap` when creating keymaps
-	nowait = false, -- use `nowait` when creating keymaps
+    mode = "v",     -- Normal mode
+    prefix = "<leader>",
+    buffer = nil,   -- Global mappings. Specify a buffer number for buffer local mappings
+    silent = true,  -- use `silent` when creating keymaps
+    noremap = true, -- use `noremap` when creating keymaps
+    nowait = false, -- use `nowait` when creating keymaps
 }
 
 local vmappings = {
-	["p"] = { '"+gP', "Paste from clipboard" },
-	["y"] = { '"+y', "Copy to clipboard" },
-	h = {
-		name = "Git Hunks",
-		s = { "<cmd>Gitsigns stage_hunk<cr>", "Stage hunk" },
-		r = { "<cmd>Gitsigns reset_hunk<cr>", "Reset hunk" },
-	},
+    ["p"] = { '"+gP', "Paste from clipboard" },
+    ["y"] = { '"+y', "Copy to clipboard" },
+    h = {
+        name = "Git Hunks",
+        s = { "<cmd>Gitsigns stage_hunk<cr>", "Stage hunk" },
+        r = { "<cmd>Gitsigns reset_hunk<cr>", "Reset hunk" },
+    },
 }
 whichkey.setup(conf)
 whichkey.register(mappings, opts)
@@ -802,7 +835,7 @@ local handler = function(virtText, lnum, endLnum, width, truncate)
         else
             chunkText = truncate(chunkText, targetWidth - curWidth)
             local hlGroup = chunk[2]
-            table.insert(newVirtText, {chunkText, hlGroup})
+            table.insert(newVirtText, { chunkText, hlGroup })
             chunkWidth = vim.fn.strdisplaywidth(chunkText)
             -- str width returned from truncate() may less than 2nd argument, need padding
             if curWidth + chunkWidth < targetWidth then
@@ -812,7 +845,7 @@ local handler = function(virtText, lnum, endLnum, width, truncate)
         end
         curWidth = curWidth + chunkWidth
     end
-    table.insert(newVirtText, {suffix, 'MoreMsg'})
+    table.insert(newVirtText, { suffix, 'MoreMsg' })
     return newVirtText
 end
 
@@ -821,7 +854,7 @@ end
 ufo.setup({
     fold_virt_text_handler = handler,
     provider_selector = function(_, _, _)
-        return {'treesitter', 'indent'}
+        return { 'treesitter', 'indent' }
     end
 })
 local bufnr = vim.api.nvim_get_current_buf()
@@ -831,15 +864,15 @@ ufo.setFoldVirtTextHandler(bufnr, handler)
 -- }}}
 -- Motion plugins {{{
 require("tabout").setup({
-    tabkey = "<Tab>", -- key to trigger tabout, set to an empty string to disable
+    tabkey = "<Tab>",             -- key to trigger tabout, set to an empty string to disable
     backwards_tabkey = "<S-Tab>", -- key to trigger backwards tabout, set to an empty string to disable
-    act_as_tab = true, -- shift content if tab out is not possible
-    act_as_shift_tab = false, -- reverse shift content if tab out is not possible (if your keyboard/terminal supports <S-Tab>)
-    default_tab = "<C-t>", -- shift default action (only at the beginning of a line, otherwise <TAB> is used)
-    default_shift_tab = "<C-d>", -- reverse shift default action,
-    enable_backwards = true, -- well ...
-    completion = true, -- if the tabkey is used in a completion pum
-    tabouts = {{
+    act_as_tab = true,            -- shift content if tab out is not possible
+    act_as_shift_tab = false,     -- reverse shift content if tab out is not possible (if your keyboard/terminal supports <S-Tab>)
+    default_tab = "<C-t>",        -- shift default action (only at the beginning of a line, otherwise <TAB> is used)
+    default_shift_tab = "<C-d>",  -- reverse shift default action,
+    enable_backwards = true,      -- well ...
+    completion = true,            -- if the tabkey is used in a completion pum
+    tabouts = { {
         open = "'",
         close = "'"
     }, {
@@ -860,7 +893,7 @@ require("tabout").setup({
     }, {
         open = "<",
         close = ">"
-    }},
+    } },
     ignore_beginning = true, --[[ if the cursor is at the beginning of a filled element it will rather tab out than shift the content ]]
     exclude = {} -- tabout will ignore these filetypes
 })
@@ -886,7 +919,6 @@ require("search-replace").setup({
 -- Git {{{
 require("gitsigns").setup {
     signs = {
-
         add = {
             hl = "GitSignsAdd",
             text = "▎",
@@ -956,12 +988,12 @@ require("neogit").setup({
 
 require("bufferline").setup({
     options = {
-        offsets = {{
+        offsets = { {
             filetype = "NvimTree",
             text = "",
             text_align = "left",
             padding = 1
-        }},
+        } },
         mode = "buffers", -- tabs or buffers
         numbers = "none",
         diagnostics = "nvim_lsp",
@@ -1286,7 +1318,7 @@ local function get_cwd()
 end
 
 local mini_sections = {
-    lualine_a = {"filetype"},
+    lualine_a = { "filetype" },
     lualine_b = {},
     lualine_c = {},
     lualine_x = {},
@@ -1295,11 +1327,11 @@ local mini_sections = {
 }
 local outline = {
     sections = mini_sections,
-    filetypes = {"lspsagaoutline"}
+    filetypes = { "lspsagaoutline" }
 }
 local diffview = {
     sections = mini_sections,
-    filetypes = {"DiffviewFiles"}
+    filetypes = { "DiffviewFiles" }
 }
 
 require("lualine").setup({
@@ -1313,23 +1345,23 @@ require("lualine").setup({
         }
     },
     sections = {
-        lualine_a = {{"mode"}},
-        lualine_b = {{"branch"}},
-        lualine_c = {lspsaga_symbols},
-        lualine_x = {{
+        lualine_a = { { "mode" } },
+        lualine_b = { { "branch" } },
+        lualine_c = { lspsaga_symbols },
+        lualine_x = { {
             "diagnostics",
-            sources = {"nvim_diagnostic"},
+            sources = { "nvim_diagnostic" },
             symbols = {
                 error = icons.diagnostics.Error,
                 warn = icons.diagnostics.Warning,
                 info = icons.diagnostics.Information
             }
-        }, {get_cwd}},
-        lualine_y = {{
+        }, { get_cwd } },
+        lualine_y = { {
             "filetype",
             colored = true,
             icon_only = true
-        }, {"encoding"}, {
+        }, { "encoding" }, {
             "fileformat",
             icons_enabled = true,
             symbols = {
@@ -1337,19 +1369,19 @@ require("lualine").setup({
                 dos = "CRLF",
                 mac = "CR"
             }
-        }},
-        lualine_z = {"progress", "location"}
+        } },
+        lualine_z = { "progress", "location" }
     },
     inactive_sections = {
         lualine_a = {},
         lualine_b = {},
-        lualine_c = {"filename"},
-        lualine_x = {"location"},
+        lualine_c = { "filename" },
+        lualine_x = { "location" },
         lualine_y = {},
         lualine_z = {}
     },
     tabline = {},
-    extensions = {"quickfix", "nvim-tree", "nvim-dap-ui", "toggleterm", "fugitive", outline, diffview}
+    extensions = { "quickfix", "nvim-tree", "nvim-dap-ui", "toggleterm", "fugitive", outline, diffview }
 })
 
 -- Workaround to make the global statusline look shifted over when nvim tree is
@@ -1364,7 +1396,7 @@ local nvim_tree_shift = {
 
 require("lualine").setup({
     sections = {
-        lualine_a = {nvim_tree_shift, "mode"}
+        lualine_a = { nvim_tree_shift, "mode" }
     }
 })
 
@@ -1374,7 +1406,7 @@ require("trouble").setup {
     mode = "workspace_diagnostics",
     fold_open = "",
     fold_closed = "",
-    auto_jump = {"lsp_definitions"},
+    auto_jump = { "lsp_definitions" },
     auto_fold = true,
     use_diagnostic_signs = true
 }
@@ -1399,7 +1431,7 @@ local function get_diagnostic_label(props)
         })
         if n > 0 then
             local fg = "#" ..
-                           string.format("%06x",
+                string.format("%06x",
                     vim.api.nvim_get_hl_by_name("DiagnosticSign" .. severity, true)["foreground"])
             table.insert(label, {
                 icon .. " " .. n .. " ",
@@ -1428,7 +1460,7 @@ local function get_git_diff(props)
         end
     end
     if #labels > 0 then
-        table.insert(labels, {"| "})
+        table.insert(labels, { "| " })
     end
     return labels
 end
@@ -1441,7 +1473,6 @@ require("incline").setup({
     hide = {
         only_win = true
     },
-
     render = function(props)
         local bufname = vim.api.nvim_buf_get_name(props.buf)
         local filename = vim.fn.fnamemodify(bufname, ":t")
@@ -1449,13 +1480,13 @@ require("incline").setup({
         local modified = vim.api.nvim_buf_get_option(props.buf, "modified") and "bold,italic" or "bold"
         local filetype_icon, color = require("nvim-web-devicons").get_icon_color(filename)
 
-        local buffer = {{get_git_diff(props)}, {
+        local buffer = { { get_git_diff(props) }, {
             filetype_icon,
             guifg = color
-        }, {" "}, {
+        }, { " " }, {
             filename,
             gui = modified
-        }}
+        } }
 
         if #diagnostics > 0 then
             table.insert(diagnostics, {
@@ -1471,7 +1502,168 @@ require("incline").setup({
 })
 
 -- }}}
--- Find me a place {{{
+-- LSP {{{
+
+require "fidget".setup {} -- shows status of lsp clients as they issue updates
+
+local function attached(client, bufnr)
+    local opts = { noremap = true, silent = false }
+    if client.name == "tsserver" or client.name == "jsonls" or client.name ==
+        "nil" or client.name == "eslint" or client.name == "html" or
+        client.name == "cssls" or client.name == "tailwindcss" then
+        -- Most of these are being turned off because prettier handles the use case better
+        client.server_capabilities.documentFormattingProvider = false
+        client.server_capabilities.documentRangeFormattingProvider = false
+    else
+        client.server_capabilities.documentFormattingProvider = true
+        client.server_capabilities.documentRangeFormattingProvider = true
+        require("lsp-format").on_attach(client)
+    end
+
+    print("LSP attached " .. client.name)
+
+    vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
+    vim.api.nvim_buf_set_option(bufnr, "tagfunc", "v:lua.vim.lsp.tagfunc")
+
+    map("n", "gd", "<cmd>Lspsaga lsp_finder<CR>", { desc = "Find symbol" })
+    map("n", "gp", "<cmd>Lspsaga peek_definition<CR>", { desc = "Peek symbol" })
+    map("n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", { desc = "Go to declaration" })
+    map("n", "gr", "<cmd>Telescope lsp_references<CR>", { desc = "Go to References" })
+    map("n", "gt", "<cmd>Lspsaga goto_type_definition<CR>", { desc = "Go to type definition" })
+    map("n", "gl", "<cmd>Lspsaga show_line_diagnostics<CR>", { desc = "See Line diagnostics" })
+    map("n", "<leader>ca", "<cmd>Lspsaga code_action<CR>", { desc = "Show Code actions" })
+    map("n", "K", "<cmd>Lspsaga hover_doc ++quiet<CR>", { desc = "Show hover documentation" })
+    map("i", "<C-p>", "<cmd>lua require('lsp_signature').toggle_float_win()<CR>", { desc = "Show signature help" })
+    map("n", "<C-p>", "<cmd>lua require('lsp_signature').toggle_float_win()<CR>", { desc = "Show signature help" })
+    map("n", "<C-S-q>", "<cmd>Telescope aerial<CR>", { desc = "Search document symbols" })
+    map("n", "<leader>go", "<cmd>Lspsaga outline<CR>", { desc = "Show document outline" })
+    map("n", "(d", '<cmd>lua vim.diagnostic.goto_prev({ border = "rounded" })<CR>', { desc = "Go to next error" })
+    map("n", ")d", '<cmd>lua vim.diagnostic.goto_next({ border = "rounded" })<CR>', { desc = "Go to previous error" })
+    map("n", "<leader>=", "<cmd>lua vim.lsp.buf.formatting_sync()<CR>", { desc = "Format current file" })
+    map("n", "gI", "<cmd>Telescope lsp_implementations<CR>", { desc = "Go to Implementation" })
+    map("v", "<leader>=", "<cmd>lua vim.lsp.buf.range_formatting()<CR>", { desc = "Format range" })
+    vim.keymap.set("n", "<leader>cr", function()
+        return ":IncRename " .. vim.fn.expand("<cword>")
+    end, { expr = true, desc = "Rename" })
+end
+
+-- LSP stuff - minimal with defaults for now
+local null_ls = require("null-ls")
+
+-- https://github.com/jose-elias-alvarez/null-ls.nvim/tree/main/lua/null-ls/builtins/formatting
+local formatting = null_ls.builtins.formatting
+-- https://github.com/jose-elias-alvarez/null-ls.nvim/tree/main/lua/null-ls/builtins/diagnostics
+local diagnostics = null_ls.builtins.diagnostics
+local codeactions = null_ls.builtins.code_actions
+
+require("lsp-format").setup {}
+
+null_ls.setup {
+    debug = false,
+    sources = {
+        -- formatting.lua_format,
+        formatting.black,
+        formatting.alejandra, -- for nix
+        formatting.prismaFmt, -- for node prisma db orm
+        formatting.prettier.with {
+
+            -- extra_args = {
+            --     "--use-tabs", "--single-quote", "--jsx-single-quote"
+            -- },
+            -- Disable markdown because formatting on save conflicts in weird ways
+            -- with the taskwiki (roam-task) stuff.
+            filetypes = {
+                "javascript", "javascriptreact", "typescript",
+                "typescriptreact", "vue", "scss", "less", "html", "css",
+                "json", "jsonc", "yaml", "graphql", "handlebars", "svelte"
+            },
+            disabled_filetypes = { "markdown" }
+        }, diagnostics.eslint_d.with {
+        args = {
+            "-f", "json", "--stdin", "--stdin-filename", "$FILENAME"
+        }
+    }, diagnostics.vale,
+        codeactions.eslint_d, codeactions.statix, -- for nix
+        diagnostics.statix,                       -- for nix
+        null_ls.builtins.hover.dictionary, codeactions.shellcheck,
+        diagnostics.shellcheck
+        -- removed formatting.rustfmt since rust_analyzer seems to do the same thing
+    },
+    on_attach = attached
+}
+local lspconfig = require("lspconfig")
+local cmp_nvim_lsp = require("cmp_nvim_lsp")
+
+local capabilities = vim.tbl_extend('keep', vim.lsp.protocol
+    .make_client_capabilities(),
+    cmp_nvim_lsp.default_capabilities());
+
+lspconfig.tsserver.setup { capabilities = capabilities, on_attach = attached }
+lspconfig.lua_ls.setup {
+    on_attach = attached,
+    capabilities = capabilities,
+    filetypes = { "lua" },
+    settings = {
+        Lua = {
+            runtime = {
+                -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
+                version = 'LuaJIT'
+            },
+            diagnostics = {
+                -- Get the language server to recognize the `vim` global
+                globals = { 'vim', "string", "require" }
+            },
+            workspace = {
+                -- Make the server aware of Neovim runtime files
+                --[[ library = vim.api.nvim_get_runtime_file("", true), ]]
+                --[[ checkThirdParty = false ]]
+            },
+            -- Do not send telemetry data containing a randomized but unique identifier
+            telemetry = { enable = false },
+            completion = { enable = true, callSnippet = "Replace" }
+        }
+    }
+}
+lspconfig.svelte.setup { on_attach = attached, capabilities = capabilities }
+lspconfig.tailwindcss.setup {
+    on_attach = attached,
+    capabilities = capabilities,
+    settings = {
+        files = { exclude = { "**/.git/**", "**/node_modules/**", "**/*.md" } }
+    }
+}
+-- nil_ls is a nix lsp
+lspconfig.nil_ls.setup { on_attach = attached, capabilities = capabilities }
+lspconfig.cssls.setup {
+    on_attach = attached,
+    capabilities = capabilities,
+    settings = { css = { lint = { unknownAtRules = "ignore" } } }
+}
+lspconfig.eslint.setup { on_attach = attached, capabilities = capabilities }
+lspconfig.html.setup { on_attach = attached, capabilities = capabilities }
+lspconfig.bashls.setup { on_attach = attached, capabilities = capabilities }
+lspconfig.pylsp.setup { on_attach = attached, capabilities = capabilities } -- for python
+lspconfig.jsonls.setup {
+    on_attach = attached,
+    settings = {
+        json = {
+            schemas = require('schemastore').json.schemas(),
+            validate = { enable = true }
+        }
+    },
+    setup = {
+        commands = {
+            Format = {
+                function()
+                    vim.lsp.buf.range_formatting({}, { 0, 0 },
+                        { vim.fn.line "$", 0 })
+                end
+            }
+        }
+    },
+    capabilities = capabilities
+}
+
 require("lspsaga").setup({
     ui = {
         winblend = 10,
@@ -1488,39 +1680,4 @@ require("lspsaga").setup({
         enable = false
     }
 })
-vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
-    border = "rounded"
-})
-vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
-    border = "rounded"
-})
-vim.diagnostic.config({
-    underline = true,
-    update_in_insert = true,
-    virtual_text = {
-        source = "always", -- Or "if_many"
-        prefix = "●" -- Could be '■', '▎', 'x'
-    },
-    severity_sort = true,
-    float = {
-        source = "always", -- Or "if_many"
-        border = "rounded",
-        style = "minimal"
-    }
-})
-
-local signs = {
-    Error = "",
-    Warn = "",
-    Hint = "",
-    Info = ""
-}
-for type, icon in pairs(signs) do
-    local hl = "DiagnosticSign" .. type
-    vim.fn.sign_define(hl, {
-        text = icon,
-        texthl = hl,
-        numhl = ""
-    })
-end
 -- }}}

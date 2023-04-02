@@ -1,4 +1,4 @@
-{ pkgs }:
+{pkgs}:
 with pkgs.vimPlugins; [
   # General Deps
   nui-nvim
@@ -85,6 +85,7 @@ with pkgs.vimPlugins; [
   null-ls-nvim
   nvim-lspconfig
   nvim-lspsaga
+  lsp-format-nvim
   nvim-navic
   aerial-nvim
   inc-rename-nvim
@@ -93,6 +94,7 @@ with pkgs.vimPlugins; [
   nvim-sqls
   #Typescript
   typescript-nvim
+  SchemaStore-nvim # json schemas
   #Golang
   nvim-dap-go
   go-nvim
