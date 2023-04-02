@@ -67,7 +67,7 @@ function ToggleQF(type)
     end
 end
 
-function map(mode, lhs, rhs, opts)
+local function map(mode, lhs, rhs, opts)
     local options = {
         noremap = true,
         silent = true
@@ -206,7 +206,9 @@ require("noice").setup({
             ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
             ["vim.lsp.util.stylize_markdown"] = true,
             ["cmp.entry.get_documentation"] = true
-        }
+        },
+        progress = {
+            enabled = false }
     },
     presets = {
         bottom_search = false,
@@ -667,14 +669,8 @@ map("x", "as", "<cmd>lua require('align').align_to_char(1, true, true)<cr>", {
 })
 map("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>")
 map("n", "<C-e>", '<cmd>lua require("harpoon.ui").toggle_quick_menu()<cr>')
-map("n", "<C-q>", "<cmd>AerialToggle!<CR>", {
-    desc = "View document symbols"
-})
-vim.keymap.set("n", "<C-c>", function()
-    ToggleQF("q")
-end, {
-    desc = "Toggle quickfix window"
-})
+map("n", "<C-q>", "<cmd>AerialToggle!<CR>", { desc = "View document symbols" })
+map("n", "<C-c>", "<cmd>lua ToggleQF('q')<CR>", { desc = "Toggle quickfix window" })
 map("v", "<C-r>", "<CMD>SearchReplaceSingleBufferVisualSelection<CR>", {
     desc = "Search and Replace"
 })
@@ -1112,14 +1108,14 @@ local data = {
         Symlink = ""
     },
     git = {
-        Add = "",
+        Add = " ",
         Branch = "",
         Diff = "",
         Git = "",
         Ignore = "",
         Mod = "M",
-        Mod_alt = "",
-        Remove = "",
+        Mod_alt = " ",
+        Remove = " ",
         Rename = "",
         Repo = "",
         Unmerged = "שׂ",
@@ -1346,7 +1342,18 @@ require("lualine").setup({
     },
     sections = {
         lualine_a = { { "mode" } },
-        lualine_b = { { "branch" } },
+        lualine_b = { { "branch" },
+            {
+                'diff',
+                -- Is it me or the symbol for modified us really weird
+                symbols = { added = data.git.Add, modified = data.git.Mod_alt, removed = data.git.Remove },
+                diff_color = {
+                    added = { fg = colors.green },
+                    modified = { fg = colors.orange },
+                    removed = { fg = colors.red },
+                },
+            }
+        },
         lualine_c = { lspsaga_symbols },
         lualine_x = { {
             "diagnostics",
@@ -1504,7 +1511,6 @@ require("incline").setup({
 -- }}}
 -- LSP {{{
 
-require "fidget".setup {} -- shows status of lsp clients as they issue updates
 
 local function attached(client, bufnr)
     local opts = { noremap = true, silent = false }
@@ -1679,5 +1685,107 @@ require("lspsaga").setup({
     symbol_in_winbar = {
         enable = false
     }
+})
+-- }}}
+-- Completions {{{
+
+local _, cmp = pcall(require, "cmp")
+
+local _, ls = pcall(require, "luasnip")
+
+local _, lspkind = pcall(require, "lspkind")
+vim.keymap.set({ "i", "s" }, "<c-l>", function()
+    if ls.expand_or_jumpable() then
+        ls.expand_or_jump()
+    end
+end, { silent = true })
+
+-- <c-j> is my jump backwards key.
+-- this always moves to the previous item within the snippet
+vim.keymap.set({ "i", "s" }, "<c-h>", function()
+    if ls.jumpable(-1) then
+        ls.jump(-1)
+    end
+end, { silent = true })
+
+require("luasnip/loaders/from_vscode").lazy_load()
+local border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }
+local cmp_select = { behavior = cmp.SelectBehavior.Select }
+cmp.setup({
+    formatting = {
+        fields = { "abbr", "kind", "menu" },
+        format = lspkind.cmp_format({
+            mode = "symbol",       -- show only symbol annotations
+            maxwidth = 50,         -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
+            ellipsis_char = "...", -- when popup menu exceed maxwidth, the truncated part would show ellipsis_char instead (must define maxwidth first)
+            -- The function below will be called before any actual modifications from lspkind
+            -- so that you can provide more controls on popup customization. (See [#30](https://github.com/onsails/lspkind-nvim/pull/30))
+            before = function(entry, vim_item)
+                vim_item.menu = ({
+                    luasnip = "[Snippet]",
+                    buffer = "[Buffer]",
+                    path = "[Path]",
+                    nvim_lsp = "[LSP]",
+                    rg = "[rg]",
+                })[entry.source.name]
+                return vim_item
+            end,
+        }),
+    },
+    snippet = {
+        expand = function(args)
+            ls.lsp_expand(args.body) -- For `luasnip` users.
+        end,
+    },
+    mapping = {
+        ["<C-j>"] = cmp.mapping.select_prev_item(cmp_select),
+        ["<C-k>"] = cmp.mapping.select_next_item(cmp_select),
+        ["<C-y>"] = cmp.mapping.confirm({ select = true }),
+        ["<CR>"] = cmp.mapping.confirm({ select = true }),
+        ["<C-Space>"] = cmp.mapping({
+            i = function()
+                if cmp.visible() then
+                    cmp.abort()
+                else
+                    cmp.complete()
+                end
+            end,
+            c = function()
+                if cmp.visible() then
+                    cmp.close()
+                else
+                    cmp.complete()
+                end
+            end,
+        }),
+        ["<Tab>"] = nil,
+        ["<S-Tab>"] = nil,
+    },
+    sources = {
+        { name = "nvim_lsp" },
+        { name = "luasnip" },
+        { name = "path" },
+        { name = "buffer",  keyword_length = 3 },
+        { name = "rg",      keyword_length = 3 },
+        { name = "nvim_lua" },
+    },
+    confirm_opts = {
+        behavior = cmp.ConfirmBehavior.Replace,
+        select = false,
+    },
+    window = {
+        completion = {
+            border = border,
+            scrollbar = "┃",
+        },
+        documentation = {
+            border = border,
+            scrollbar = "┃",
+        },
+    },
+    experimental = {
+        ghost_text = false,
+        native_menu = false,
+    },
 })
 -- }}}

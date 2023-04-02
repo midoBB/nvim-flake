@@ -110,8 +110,7 @@ with pkgs.vimPlugins; [
   cmp-path
   cmp-rg
   cmp-treesitter
-  cmp-vsnip
-  vim-vsnip
-  vim-vsnip-integ
+  cmp_luasnip
+  luasnip
   friendly-snippets
 ]
