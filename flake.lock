@@ -139,11 +139,11 @@
     "nvim-lspsaga": {
       "flake": false,
       "locked": {
-        "lastModified": 1680312397,
-        "narHash": "sha256-4s3WMCVsqBP+XFnj/ZA+QvuwYW53veGPhhGhZNBQ4qo=",
+        "lastModified": 1680438588,
+        "narHash": "sha256-8WCpWILXqEuV9GGLBy1i5wX+y4R7EZQE8mHJm2S4clc=",
         "owner": "glepnir",
         "repo": "lspsaga.nvim",
-        "rev": "ba8ad94b42a9a807c2ab0b4545c098f0b513f3f4",
+        "rev": "2640c4bbfc73fdccbac17b795e5146d8b900f6dd",
         "type": "github"
       },
       "original": {
@@ -171,11 +171,11 @@
     "oxocarbon": {
       "flake": false,
       "locked": {
-        "lastModified": 1679530098,
-        "narHash": "sha256-NXWM8KlZgMgqGw3lSNQSopsLChmoYJJxjeFTvY90cF8=",
+        "lastModified": 1680421394,
+        "narHash": "sha256-1a03dV0owrALU+c2KA3geGBYbTuQ7cejaw2rcYFWRWo=",
         "owner": "nyoom-engineering",
         "repo": "oxocarbon.nvim",
-        "rev": "fc236ef07361a1596081f242940f97af3ba26db1",
+        "rev": "be12ad8a9607a195d0fc081af0bf3cd38b095d12",
         "type": "github"
       },
       "original": {
