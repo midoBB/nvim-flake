@@ -218,9 +218,23 @@
     },
     "root": {
       "inputs": {
+        "bufferline-cycle-windowless": "bufferline-cycle-windowless",
+        "cutlass": "cutlass",
+        "hlargs": "hlargs",
+        "incline": "incline",
         "neovim": "neovim",
+        "neovim-session-manager": "neovim-session-manager",
         "nixpkgs": "nixpkgs",
-        "vim-plugins": "vim-plugins"
+        "nvim-lspsaga": "nvim-lspsaga",
+        "nvim-sqls": "nvim-sqls",
+        "oxocarbon": "oxocarbon",
+        "persistent-breakpoints": "persistent-breakpoints",
+        "reticle": "reticle",
+        "search-replace": "search-replace",
+        "splitjoin": "splitjoin",
+        "tabout": "tabout",
+        "typescript-nvim": "typescript-nvim",
+        "yanky": "yanky"
       }
     },
     "search-replace": {
@@ -285,35 +299,6 @@
         "owner": "jose-elias-alvarez",
         "repo": "typescript.nvim",
         "type": "github"
-      }
-    },
-    "vim-plugins": {
-      "inputs": {
-        "bufferline-cycle-windowless": "bufferline-cycle-windowless",
-        "cutlass": "cutlass",
-        "hlargs": "hlargs",
-        "incline": "incline",
-        "neovim-session-manager": "neovim-session-manager",
-        "nvim-lspsaga": "nvim-lspsaga",
-        "nvim-sqls": "nvim-sqls",
-        "oxocarbon": "oxocarbon",
-        "persistent-breakpoints": "persistent-breakpoints",
-        "reticle": "reticle",
-        "search-replace": "search-replace",
-        "splitjoin": "splitjoin",
-        "tabout": "tabout",
-        "typescript-nvim": "typescript-nvim",
-        "yanky": "yanky"
-      },
-      "locked": {
-        "lastModified": 1,
-        "narHash": "sha256-I7Fmsmi9tkK6hZlwZN+un10h1J4G7eJqGa0NwpHd8sw=",
-        "path": "./plugins",
-        "type": "path"
-      },
-      "original": {
-        "path": "./plugins",
-        "type": "path"
       }
     },
     "yanky": {
