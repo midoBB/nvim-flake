@@ -75,7 +75,7 @@
       url = "github:jose-elias-alvarez/typescript.nvim";
       flake = false;
     };
-  }
+  };
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   inputs.neovim = {
     url = "github:neovim/neovim/stable?dir=contrib";
