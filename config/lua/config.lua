@@ -1,4 +1,5 @@
 -- # vim:fileencoding=utf-8:ft=lua:foldmethod=marker
+require('impatient')
 -- Helper functions {{{
 function OpenQF()
     local qf_name = "quickfix"
@@ -103,7 +104,7 @@ local options = {
     updatetime = 50,
     verbose = 0,
     visualbell = false,
-    spell = true,
+    spell = false,
     -- indentation
     autoindent = true,
     breakindent = true,

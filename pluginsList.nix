@@ -1,5 +1,6 @@
 {pkgs}:
 with pkgs.vimPlugins; [
+  impatient-nvim
   # General Deps
   nui-nvim
   plenary-nvim
