@@ -1,5 +1,4 @@
-{ pkgs }:
-{
+{pkgs}: {
   deps1 = with pkgs; [
     git
     vale # linter for prose
@@ -12,9 +11,6 @@
     shellcheck
     lua-language-server
     nodePackages.svelte-language-server
-    nodePackages.diagnostic-languageserver
-    nodePackages.typescript-language-server
-    nodePackages."@tailwindcss/language-server"
     black
     python310Packages.python-lsp-server # todo: is specifying 310 an issue?
     nodePackages.bash-language-server
@@ -28,6 +24,8 @@
     delve
     golines
     golangci-lint
+    nodePackages.diagnostic-languageserver
+    nodePackages."@tailwindcss/language-server"
     nodePackages.vscode-langservers-extracted
     nodePackages.prettier_d_slim
     nodePackages.eslint_d
@@ -36,9 +34,9 @@
     deadnix
     sqls
     jq
-# YAML
+    # YAML
     nodePackages.yaml-language-server
     yamllint
   ];
-  deps2 = with pkgs; [ lazygit ];
+  deps2 = with pkgs; [lazygit];
 }
