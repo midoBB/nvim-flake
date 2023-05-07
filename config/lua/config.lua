@@ -1589,7 +1589,7 @@ null_ls.setup {
         args = {
             "-f", "json", "--stdin", "--stdin-filename", "$FILENAME"
         }
-    }, diagnostics.vale,
+    }, diagnostics.vale, diagnostics.hadolint,
         codeactions.eslint_d, codeactions.statix, -- for nix
         diagnostics.statix,                       -- for nix
         null_ls.builtins.hover.dictionary, codeactions.shellcheck,
@@ -1641,6 +1641,10 @@ lspconfig.tailwindcss.setup {
 }
 -- nil_ls is a nix lsp
 lspconfig.nil_ls.setup { on_attach = attached, capabilities = capabilities }
+lspconfig.elixirls.setup { on_attach = attached, capabilities = capabilities }
+lspconfig.prismals.setup { on_attach = attached, capabilities = capabilities }
+lspconfig.dockerls.setup { on_attach = attached, capabilities = capabilities }
+lspconfig.docker_compose_language_service.setup { on_attach = attached, capabilities = capabilities }
 lspconfig.cssls.setup {
     on_attach = attached,
     capabilities = capabilities,
