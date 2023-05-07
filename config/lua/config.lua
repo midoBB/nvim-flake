@@ -1641,7 +1641,7 @@ lspconfig.tailwindcss.setup {
 }
 -- nil_ls is a nix lsp
 lspconfig.nil_ls.setup { on_attach = attached, capabilities = capabilities }
-lspconfig.elixirls.setup { on_attach = attached, capabilities = capabilities }
+lspconfig.elixirls.setup { cmd = "elixir-ls", on_attach = attached, capabilities = capabilities }
 lspconfig.prismals.setup { on_attach = attached, capabilities = capabilities }
 lspconfig.dockerls.setup { on_attach = attached, capabilities = capabilities }
 lspconfig.docker_compose_language_service.setup { on_attach = attached, capabilities = capabilities }
