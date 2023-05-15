@@ -1543,6 +1543,7 @@ local function attached(client, bufnr)
     map("i", "<C-p>", "<cmd>lua require('lsp_signature').toggle_float_win()<CR>", { desc = "Show signature help" })
     map("n", "<C-p>", "<cmd>lua require('lsp_signature').toggle_float_win()<CR>", { desc = "Show signature help" })
     map("n", "<C-S-q>", "<cmd>Telescope aerial<CR>", { desc = "Search document symbols" })
+    map("n", "<leader>cl", "<cmd>lua vim.lsp.codelens.run()<CR>", { desc = "Run codelens" })
     map("n", "<leader>go", "<cmd>Lspsaga outline<CR>", { desc = "Show document outline" })
     map("n", "(d", '<cmd>lua vim.diagnostic.goto_prev({ border = "rounded" })<CR>', { desc = "Go to next error" })
     map("n", ")d", '<cmd>lua vim.diagnostic.goto_next({ border = "rounded" })<CR>', { desc = "Go to previous error" })
@@ -1794,3 +1795,38 @@ cmp.setup({
     },
 })
 -- }}}
+--- Scala {{{
+
+local metals_config = require("metals").bare_config()
+
+-- Example of settings
+metals_config.settings = {
+    showImplicitArguments = true,
+    --[[ excludedPackages = { "akka.actor.typed.javadsl", "com.github.swagger.akka.javadsl" }, ]]
+}
+
+-- *READ THIS*
+-- I *highly* recommend setting statusBarProvider to true, however if you do,
+-- you *have* to have a setting to display this in your statusline or else
+-- you'll not see any messages from metals. There is more info in the help
+-- docs about this
+metals_config.init_options.statusBarProvider = "on"
+
+-- Example if you are using cmp how to make sure the correct capabilities for snippets are set
+metals_config.capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+-- Debug settings if you're using nvim-dap
+metals_config.on_attach = function(client, bufnumber)
+    attached(client, bufnumber)
+end
+
+-- Autocmd that will actually be in charging of starting the whole thing
+local nvim_metals_group = vim.api.nvim_create_augroup("nvim-metals", { clear = true })
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = { "scala", "sbt" },
+    callback = function()
+        require("metals").initialize_or_attach(metals_config)
+    end,
+    group = nvim_metals_group,
+})
+--- }}}

@@ -103,6 +103,8 @@ with pkgs.vimPlugins; [
   # Programming: Database support
   vim-dadbod
   vim-dadbod-ui
+  # Programming : Scala
+  nvim-metals
   # Programming: Autocompletion setup
   nvim-cmp
   cmp-buffer
