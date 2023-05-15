@@ -7,6 +7,7 @@ with pkgs.vimPlugins; [
   popup-nvim
   dressing-nvim
   promise-async
+  nvim-notify
   noice-nvim
   # Fuzzy Finder
   telescope-nvim # da best popup fuzzy finder
