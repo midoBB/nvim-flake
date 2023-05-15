@@ -13,19 +13,9 @@
     f [] attrList;
   customRC = import ../config {inherit pkgs;};
   plugins = import ../pluginsList.nix {inherit pkgs;};
-  runtimeDeps = import ../runtimeDeps.nix {inherit pkgs;};
-  neovimRuntimeDependencies = pkgs.symlinkJoin {
-    name = "neovimRuntimeDependencies";
-    paths = runtimeDeps.deps1;
-  };
-  neovimRuntimeDependencies2 = pkgs.symlinkJoin {
-    name = "neovimRuntimeDependencies2";
-    paths = runtimeDeps.deps2;
-  };
 
   neovimaugmented = recursiveMerge [
     pkgs.neovim-unwrapped
-    {buildInputs = neovimRuntimeDependencies;}
   ];
   myNeovimUnwrapped = pkgs.wrapNeovim neovimaugmented {
     configure = {
@@ -36,7 +26,6 @@
 in
   pkgs.writeShellApplication {
     name = "nvim";
-    runtimeInputs = [neovimRuntimeDependencies2 neovimRuntimeDependencies];
     text = ''
       ${myNeovimUnwrapped}/bin/nvim "$@"
     '';

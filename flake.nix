@@ -77,15 +77,10 @@
     };
   };
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-  inputs.neovim = {
-    url = "github:neovim/neovim/stable?dir=contrib";
-    inputs.nixpkgs.follows = "nixpkgs";
-  };
 
   outputs = {
     self,
     nixpkgs,
-    neovim,
     oxocarbon,
     nvim-lspsaga,
     nvim-sqls,
@@ -100,90 +95,89 @@
     bufferline-cycle-windowless,
     incline,
     persistent-breakpoints,
-    typescript-nvim
+    typescript-nvim,
   }: let
-        missingVimPluginsInNixpkgs = pkgs: {
-        oxocarbon = pkgs.vimUtils.buildVimPluginFrom2Nix {
-          name = "oxocarbon";
-          src = oxocarbon;
-        };
+    missingVimPluginsInNixpkgs = pkgs: {
+      oxocarbon = pkgs.vimUtils.buildVimPluginFrom2Nix {
+        name = "oxocarbon";
+        src = oxocarbon;
+      };
 
-        nvim-lspsaga = pkgs.vimUtils.buildVimPluginFrom2Nix {
-          name = "lspsaga";
-          src = nvim-lspsaga;
-        };
+      nvim-lspsaga = pkgs.vimUtils.buildVimPluginFrom2Nix {
+        name = "lspsaga";
+        src = nvim-lspsaga;
+      };
 
-        nvim-sqls = pkgs.vimUtils.buildVimPluginFrom2Nix {
-          name = "sqls";
-          src = nvim-sqls;
-        };
+      nvim-sqls = pkgs.vimUtils.buildVimPluginFrom2Nix {
+        name = "sqls";
+        src = nvim-sqls;
+      };
 
-        splitjoin = pkgs.vimUtils.buildVimPluginFrom2Nix {
-          name = "splitjoin.nvim";
-          src = splitjoin;
-        };
+      splitjoin = pkgs.vimUtils.buildVimPluginFrom2Nix {
+        name = "splitjoin.nvim";
+        src = splitjoin;
+      };
 
-        hlargs = pkgs.vimUtils.buildVimPluginFrom2Nix {
-          name = "hlargs.nvim";
-          src = hlargs;
-        };
+      hlargs = pkgs.vimUtils.buildVimPluginFrom2Nix {
+        name = "hlargs.nvim";
+        src = hlargs;
+      };
 
-        yanky = pkgs.vimUtils.buildVimPluginFrom2Nix {
-          name = "yanky.nvim";
-          src = yanky;
-        };
+      yanky = pkgs.vimUtils.buildVimPluginFrom2Nix {
+        name = "yanky.nvim";
+        src = yanky;
+      };
 
-        cutlass = pkgs.vimUtils.buildVimPluginFrom2Nix{
-          name = "cutlass.nvim";
-          src = cutlass;
-        };
+      cutlass = pkgs.vimUtils.buildVimPluginFrom2Nix {
+        name = "cutlass.nvim";
+        src = cutlass;
+      };
 
-        search-replace = pkgs.vimUtils.buildVimPluginFrom2Nix {
-          name = "search-replace.nvim";
-          src = search-replace;
-        };
+      search-replace = pkgs.vimUtils.buildVimPluginFrom2Nix {
+        name = "search-replace.nvim";
+        src = search-replace;
+      };
 
-        neovim-session-manager = pkgs.vimUtils.buildVimPluginFrom2Nix {
-          name = "neovim-session-manager";
-          src = neovim-session-manager;
-        };
+      neovim-session-manager = pkgs.vimUtils.buildVimPluginFrom2Nix {
+        name = "neovim-session-manager";
+        src = neovim-session-manager;
+      };
 
-        tabout = pkgs.vimUtils.buildVimPluginFrom2Nix {
-          name = "tabout.nvim";
-          src = tabout;
-        };
+      tabout = pkgs.vimUtils.buildVimPluginFrom2Nix {
+        name = "tabout.nvim";
+        src = tabout;
+      };
 
-        reticle = pkgs.vimUtils.buildVimPluginFrom2Nix {
-          name = "reticle.nvim";
-          src = reticle;
-        };
+      reticle = pkgs.vimUtils.buildVimPluginFrom2Nix {
+        name = "reticle.nvim";
+        src = reticle;
+      };
 
-        bufferline-cycle-windowless = pkgs.vimUtils.buildVimPluginFrom2Nix {
-          name = "bufferline-cycle-windowless.nvim";
-          src = bufferline-cycle-windowless;
-        };
+      bufferline-cycle-windowless = pkgs.vimUtils.buildVimPluginFrom2Nix {
+        name = "bufferline-cycle-windowless.nvim";
+        src = bufferline-cycle-windowless;
+      };
 
-        incline = pkgs.vimUtils.buildVimPluginFrom2Nix {
+      incline = pkgs.vimUtils.buildVimPluginFrom2Nix {
         name = "incline.nvim";
         src = incline;
-        };
+      };
 
-        persistent-breakpoints = pkgs.vimUtils.buildVimPluginFrom2Nix {
-          name = "persistent-breakpoints.nvim";
-          src = persistent-breakpoints;
-        };
+      persistent-breakpoints = pkgs.vimUtils.buildVimPluginFrom2Nix {
+        name = "persistent-breakpoints.nvim";
+        src = persistent-breakpoints;
+      };
 
-        typescript-nvim = pkgs.vimUtils.buildVimPluginFrom2Nix {
-         name = "typescript.nvim";
+      typescript-nvim = pkgs.vimUtils.buildVimPluginFrom2Nix {
+        name = "typescript.nvim";
         src = typescript-nvim;
-        };
-
       };
-      vim-plugins-overlay = _final: prev: {
-        vimPlugins = prev.vimPlugins // (missingVimPluginsInNixpkgs prev.pkgs);
-      };
+    };
+    vim-plugins-overlay = _final: prev: {
+      vimPlugins = prev.vimPlugins // (missingVimPluginsInNixpkgs prev.pkgs);
+    };
     overlayFlakeInputs = prev: final: {
-      inherit (neovim.packages.x86_64-linux) neovim;
+      inherit (nixpkgs.packages.neovim.x86_64-linux) neovim;
     };
 
     overlayMyNeovim = prev: final: {
