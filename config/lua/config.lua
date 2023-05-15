@@ -1805,6 +1805,28 @@ metals_config.settings = {
     --[[ excludedPackages = { "akka.actor.typed.javadsl", "com.github.swagger.akka.javadsl" }, ]]
 }
 
+-- Debug settings if you're using nvim-dap
+local dap = require("dap")
+
+dap.configurations.scala = {
+    {
+        type = "scala",
+        request = "launch",
+        name = "RunOrTest",
+        metals = {
+            runType = "runOrTestFile",
+            --args = { "firstArg", "secondArg", "thirdArg" }, -- here just as an example
+        },
+    },
+    {
+        type = "scala",
+        request = "launch",
+        name = "Test Target",
+        metals = {
+            runType = "testTarget",
+        },
+    },
+}
 -- *READ THIS*
 -- I *highly* recommend setting statusBarProvider to true, however if you do,
 -- you *have* to have a setting to display this in your statusline or else
@@ -1818,6 +1840,7 @@ metals_config.capabilities = require("cmp_nvim_lsp").default_capabilities()
 -- Debug settings if you're using nvim-dap
 metals_config.on_attach = function(client, bufnumber)
     attached(client, bufnumber)
+    require("metals").setup_dap()
 end
 
 -- Autocmd that will actually be in charging of starting the whole thing
