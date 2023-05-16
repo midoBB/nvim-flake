@@ -1294,17 +1294,16 @@ local function lspsaga_symbols()
     end
 end
 
-local function diff_source()
-    local gitsigns = vim.b.gitsigns_status_dict
-    if gitsigns then
-        return {
-            added = gitsigns.added,
-            modified = gitsigns.changed,
-            removed = gitsigns.removed
-        }
-    end
-end
-
+--[[ local function diff_source() ]]
+--[[     local gitsigns = vim.b.gitsigns_status_dict ]]
+--[[     if gitsigns then ]]
+--[[         return { ]]
+--[[             added = gitsigns.added, ]]
+--[[             modified = gitsigns.changed, ]]
+--[[             removed = gitsigns.removed ]]
+--[[         } ]]
+--[[     end ]]
+--[[ end ]]
 local function get_cwd()
     local cwd = vim.fn.getcwd()
     local home = os.getenv("HOME")
@@ -1564,6 +1563,20 @@ local formatting = null_ls.builtins.formatting
 local diagnostics = null_ls.builtins.diagnostics
 local codeactions = null_ls.builtins.code_actions
 
+local function fix_imports()
+    local params = vim.lsp.util.make_range_params()
+    params.context = { only = { "source.organizeImports" } }
+    local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params)
+    for _, res in pairs(result or {}) do
+        for _, r in pairs(res.result or {}) do
+            if r.edit then
+                vim.lsp.util.apply_workspace_edit(r.edit, "UTF-8")
+            else
+                vim.lsp.buf.execute_command(r.command)
+            end
+        end
+    end
+end
 require("lsp-format").setup {}
 
 null_ls.setup {
@@ -1675,6 +1688,63 @@ lspconfig.jsonls.setup {
     },
     capabilities = capabilities
 }
+lspconfig.gopls.setup({
+    on_attach = function(clientgo, bufnrgo)
+        attached(clientgo, bufnrgo)
+        require("lsp-inlayhints").setup({
+            inlay_hints = { type_hints = { prefix = "=> " } },
+        })
+        require("lsp-inlayhints").on_attach(clientgo, bufnrgo)
+        vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+            group = vim.api.nvim_create_augroup("FixGoImports", { clear = true }),
+            pattern = "*.go",
+            callback = function()
+                fix_imports()
+            end,
+        })
+    end,
+    settings = {
+        gopls = {
+            analyses = {
+                assign = true,
+                atomic = true,
+                bools = true,
+                composites = true,
+                copylocks = true,
+                deepequalerrors = true,
+                embed = true,
+                erroras = true,
+                fieldalignment = true,
+                httpresponse = true,
+                ifaceassert = true,
+                loopclosure = true,
+                nilfunc = true,
+                nilness = true,
+                nonewvars = true,
+                printf = true,
+                shadow = true,
+                shift = true,
+                unusedparams = true,
+                unusedvariable = true,
+                unusedwrite = true,
+                useany = true,
+            },
+            experimentalPostfixCompletions = true,
+            gofumpt = true,
+            staticcheck = true,
+            usePlaceholders = true,
+            hints = {
+                assignVariableTypes = true,
+                compositeLiteralFields = true,
+                compositeLiteralTypes = true,
+                constantValues = true,
+                functionTypeParameters = true,
+                parameterNames = true,
+                rangeVariableTypes = true,
+            },
+        },
+    },
+})
 
 require("lspsaga").setup({
     ui = {
@@ -1805,28 +1875,7 @@ metals_config.settings = {
     --[[ excludedPackages = { "akka.actor.typed.javadsl", "com.github.swagger.akka.javadsl" }, ]]
 }
 
--- Debug settings if you're using nvim-dap
-local dap = require("dap")
 
-dap.configurations.scala = {
-    {
-        type = "scala",
-        request = "launch",
-        name = "RunOrTest",
-        metals = {
-            runType = "runOrTestFile",
-            --args = { "firstArg", "secondArg", "thirdArg" }, -- here just as an example
-        },
-    },
-    {
-        type = "scala",
-        request = "launch",
-        name = "Test Target",
-        metals = {
-            runType = "testTarget",
-        },
-    },
-}
 -- *READ THIS*
 -- I *highly* recommend setting statusBarProvider to true, however if you do,
 -- you *have* to have a setting to display this in your statusline or else
@@ -1852,4 +1901,163 @@ vim.api.nvim_create_autocmd("FileType", {
     end,
     group = nvim_metals_group,
 })
+--- }}}
+--- GoLang {{{
+
+local golang_group = vim.api.nvim_create_augroup("go.nvim", { clear = true })
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = { "go" },
+    callback = function()
+        require("go").setup()
+        local default_options = { silent = true }
+        whichkey.register({
+            c = {
+                name = "Coding",
+                a = { "<cmd>GoCodeAction<cr>", "Code action" },
+                e = { "<cmd>GoIfErr<cr>", "Add if err" },
+                h = {
+                    name = "Helper",
+                    a = { "<cmd>GoAddTag<cr>", "Add tags to struct" },
+                    r = { "<cmd>GoRMTag<cr>", "Remove tags to struct" },
+                    c = { "<cmd>GoCoverage<cr>", "Test coverage" },
+                    g = { "<cmd>lua require('go.comment').gen()<cr>", "Generate comment" },
+                    v = { "<cmd>GoVet<cr>", "Go vet" },
+                    t = { "<cmd>GoModTidy<cr>", "Go mod tidy" },
+                    i = { "<cmd>GoModInit<cr>", "Go mod init" },
+                },
+                i = { "<cmd>GoToggleInlay<cr>", "Toggle inlay" },
+                l = { "<cmd>GoLint<cr>", "Run linter" },
+                o = { "<cmd>GoPkgOutline<cr>", "Outline" },
+                r = { "<cmd>GoRun<cr>", "Run" },
+                s = { "<cmd>GoFillStruct<cr>", "Autofill struct" },
+                t = {
+                    name = "Tests",
+                    r = { "<cmd>GoTest<cr>", "Run tests" },
+                    a = { "<cmd>GoAlt!<cr>", "Open alt file" },
+                    s = { "<cmd>GoAltS!<cr>", "Open alt file in split" },
+                    v = { "<cmd>GoAltV!<cr>", "Open alt file in vertical split" },
+                    u = { "<cmd>GoTestFunc<cr>", "Run test for current func" },
+                    f = { "<cmd>GoTestFile<cr>", "Run test for current file" },
+                    g = { "<cmd>GoAddAllTest<cr>", "Generate tests for current file" },
+                },
+                x = {
+                    name = "Code Lens",
+                    l = { "<cmd>GoCodeLenAct<cr>", "Toggle Lens" },
+                    a = { "<cmd>GoCodeAction<cr>", "Code Action" },
+                },
+            },
+        }, { prefix = "<leader>", mode = "n", default_options })
+        whichkey.register({
+            c = {
+                -- name = "Coding",
+                j = { "<cmd>'<,'>GoJson2Struct<cr>", "Json to struct" },
+            },
+        }, { prefix = "<leader>", mode = "v", default_options })
+    end,
+    group = golang_group,
+})
+--- }}}
+--- DAP {{{
+
+local status_dap, dap = pcall(require, "dap")
+local status_ui, dapui = pcall(require, "dapui")
+if not status_dap or not status_ui then
+    return
+end
+local dap_breakpoint = {
+    breakpoint = {
+        text = "",
+        texthl = "LspDiagnosticsSignError",
+        linehl = "",
+        numhl = "",
+    },
+    rejected = {
+        text = "",
+        texthl = "LspDiagnosticsSignHint",
+        linehl = "",
+        numhl = "",
+    },
+    stopped = {
+        text = "",
+        texthl = "LspDiagnosticsSignInformation",
+        linehl = "DiagnosticUnderlineInfo",
+        numhl = "LspDiagnosticsSignInformation",
+    },
+}
+
+vim.fn.sign_define("DapBreakpoint", dap_breakpoint.breakpoint)
+vim.fn.sign_define("DapStopped", dap_breakpoint.stopped)
+vim.fn.sign_define("DapBreakpointRejected", dap_breakpoint.rejected)
+local status_dap_virtual_text, dap_virtual_text = pcall(require, "nvim-dap-virtual-text")
+if status_dap_virtual_text then
+    dap_virtual_text.setup({
+        commented = true,
+    })
+end
+
+dapui.setup {
+    expand_lines = true,
+    icons = { expanded = "", collapsed = "", circular = "" },
+    mappings = {
+        -- Use a table to apply multiple mappings
+        expand = { "<CR>", "<2-LeftMouse>" },
+    },
+    layouts = {
+        {
+            elements = {
+                { id = "scopes",      size = 0.33 },
+                { id = "breakpoints", size = 0.17 },
+                { id = "stacks",      size = 0.25 },
+                { id = "watches",     size = 0.25 },
+            },
+            size = 0.33,
+            position = "right",
+        },
+        {
+            elements = {
+                { id = "repl",    size = 0.45 },
+                { id = "console", size = 0.55 },
+            },
+            size = 0.27,
+            position = "bottom",
+        },
+    },
+    floating = {
+        max_height = 0.9,
+        max_width = 0.5,             -- Floats will be treated as percentage of your screen.
+        border = vim.g.border_chars, -- Border style. Can be 'single', 'double' or 'rounded'
+        mappings = {
+            close = { "q", "<Esc>" },
+        },
+    },
+} -- use default
+dap.listeners.after.event_initialized["dapui_config"] = function()
+    dapui.open()
+end
+dap.listeners.before.event_terminated["dapui_config"] = function()
+    dapui.close()
+end
+dap.listeners.before.event_exited["dapui_config"] = function()
+    dapui.close()
+end
+
+dap.configurations.scala = {
+    {
+        type = "scala",
+        request = "launch",
+        name = "RunOrTest",
+        metals = {
+            runType = "runOrTestFile",
+            --args = { "firstArg", "secondArg", "thirdArg" }, -- here just as an example
+        },
+    },
+    {
+        type = "scala",
+        request = "launch",
+        name = "Test Target",
+        metals = {
+            runType = "testTarget",
+        },
+    },
+}
 --- }}}
