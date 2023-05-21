@@ -5,12 +5,10 @@
       url = "github:nyoom-engineering/oxocarbon.nvim";
       flake = false;
     };
-
-    nvim-lspsaga = {
-      url = "github:glepnir/lspsaga.nvim";
+    barbacue-nvim = {
+      url = "github:utilyre/barbecue.nvim?rev=ec237dfcab297a973f4f7146d4527b1f6aae8d74";
       flake = false;
     };
-
     nvim-sqls = {
       url = "github:nanotee/sqls.nvim";
       flake = false;
@@ -66,6 +64,11 @@
       flake = false;
     };
 
+    windowsep = {
+      url = "github:nvim-zh/colorful-winsep.nvim";
+      flake = false;
+    };
+
     persistent-breakpoints = {
       url = "github:Weissle/persistent-breakpoints.nvim";
       flake = false;
@@ -75,6 +78,14 @@
       url = "github:jose-elias-alvarez/typescript.nvim";
       flake = false;
     };
+    virtual-types = {
+      url = "github:jubnzv/virtual-types.nvim";
+      flake = false;
+    };
+    lsplens = {
+      url = "github:VidocqH/lsp-lens.nvim";
+      flake = false;
+    };
   };
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
@@ -82,7 +93,10 @@
     self,
     nixpkgs,
     oxocarbon,
-    nvim-lspsaga,
+    barbacue-nvim,
+    virtual-types,
+    lsplens,
+    windowsep,
     nvim-sqls,
     splitjoin,
     hlargs,
@@ -102,12 +116,22 @@
         name = "oxocarbon";
         src = oxocarbon;
       };
-
-      nvim-lspsaga = pkgs.vimUtils.buildVimPluginFrom2Nix {
-        name = "lspsaga";
-        src = nvim-lspsaga;
+      barbecue = pkgs.vimUtils.buildVimPluginFrom2Nix {
+        name = "barbacue";
+        src = barbacue-nvim;
       };
-
+      virtual-types = pkgs.vimUtils.buildVimPluginFrom2Nix {
+        name = "virtualtypes";
+        src = virtual-types;
+      };
+      lsplens = pkgs.vimUtils.buildVimPluginFrom2Nix {
+        name = "lsplens";
+        src = lsplens;
+      };
+      window = pkgs.vimUtils.buildVimPluginFrom2Nix {
+        name = "windowsep";
+        src = windowsep;
+      };
       nvim-sqls = pkgs.vimUtils.buildVimPluginFrom2Nix {
         name = "sqls";
         src = nvim-sqls;

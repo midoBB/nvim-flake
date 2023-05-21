@@ -20,6 +20,7 @@ with pkgs.vimPlugins; [
   bufferline-cycle-windowless
   bufferline-nvim
   nvim-bufdel
+  bufdelete-nvim
   incline
   # Appearance
   oxocarbon
@@ -32,6 +33,7 @@ with pkgs.vimPlugins; [
   smart-splits-nvim
   reticle
   which-key-nvim
+  window
   trouble-nvim
   todo-comments-nvim
   undotree
@@ -86,10 +88,15 @@ with pkgs.vimPlugins; [
   lspkind-nvim
   null-ls-nvim
   nvim-lspconfig
-  nvim-lspsaga
   lsp-format-nvim
   nvim-navic
+  glance-nvim
+  nvim-lightbulb
+  nvim-code-action-menu
+  virtual-types
+  lsplens
   aerial-nvim
+  barbecue
   inc-rename-nvim
   # Programming : Language support
   #SQL
@@ -105,6 +112,8 @@ with pkgs.vimPlugins; [
   vim-dadbod-ui
   # Programming : Scala
   nvim-metals
+  # Programming : Haskell
+  haskell-tools-nvim
   # Programming: Autocompletion setup
   nvim-cmp
   cmp-buffer

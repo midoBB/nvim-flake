@@ -209,14 +209,18 @@ require("noice").setup({
             ["cmp.entry.get_documentation"] = true
         },
         progress = {
-            enabled = false }
+            enabled = false,
+        },
+
+        hover = {
+            enabled = false,
+        }
     },
     presets = {
         bottom_search = false,
         command_palette = true,
         long_message_to_split = true,
         inc_rename = true,
-        lsp_doc_border = true
     },
     messages = {
         enabled = true,              -- enables the Noice messages UI
@@ -269,10 +273,13 @@ vim.diagnostic.config({
     },
     severity_sort = true,
     float = {
-        source = "always", -- Or "if_many"
+        focused = false,
+        style = "minimal",
         border = "rounded",
-        style = "minimal"
-    }
+        source = "always",
+        header = "",
+        prefix = "",
+    },
 })
 
 local signs = {
@@ -571,7 +578,8 @@ require("fidget").setup({})
 require("reticle").setup({})
 require("aerial").setup({})
 require("hlslens").setup({})
-
+require("lsp-lens").setup({})
+require("colorful-winsep").setup({})
 -- }}}
 -- Keymaps {{{
 
@@ -586,7 +594,7 @@ map("i", "<C-n>", "<Nop>")
 --- Disable Recording & Ex Mode
 map("", "q", "<nop>")
 map("", "Q", "<nop>")
-
+map("", "gQ", "<nop>")
 map("n", "U", "<C-R>")
 map("", "<C-r>", "<Nop>")
 
@@ -704,7 +712,7 @@ local mappings = {
     ["y"] = { '"+y', "Copy to clipboard" },
     ["w"] = { "<cmd>update!<CR>", "Save" },
     ["<leader>q"] = { "<cmd>qa<CR>", "Quit" },
-    ["q"] = { "<cmd>BufDel<CR>", "Close the current buffer" },
+    ["q"] = { "<cmd>Bdelete<CR>", "Close the current buffer" },
     b = {
         name = "+Buffer",
         c = { "<cmd>BufDelOthers<CR>", "Close the other buffers" },
@@ -1026,6 +1034,11 @@ require("bufferline-cycle-windowless").setup({
 })
 -- }}}
 -- Lualine {{{
+local metals_stats = function()
+    local status = vim.g['metals_status']
+    if status == nil then return "" else return status end
+end
+
 local function get_palette()
     return {
         rosewater = "#DC8A78",
@@ -1266,44 +1279,19 @@ local icons = {
     ui = icons.get("ui", true)
 }
 
-local _cache = {
-    context = "",
-    bufnr = -1
-}
-local function lspsaga_symbols()
-    local exclude = {
-        ["terminal"] = true,
-        ["toggleterm"] = true,
-        ["prompt"] = true,
-        ["NvimTree"] = true,
-        ["help"] = true
-    }
-    if vim.api.nvim_win_get_config(0).zindex or exclude[vim.bo.filetype] then
-        return "" -- Excluded filetypes
-    else
-        local currbuf = vim.api.nvim_get_current_buf()
-        local ok, lspsaga = pcall(require, "lspsaga.symbolwinbar")
-        if ok and lspsaga:get_winbar() ~= nil then
-            _cache.context = lspsaga:get_winbar()
-            _cache.bufnr = currbuf
-        elseif _cache.bufnr ~= currbuf then
-            _cache.context = "" -- Reset [invalid] cache (usually from another buffer)
-        end
 
-        return _cache.context
+local function diff_source()
+    local gitsigns = vim.b.gitsigns_status_dict
+    if gitsigns then
+        return {
+            added = gitsigns.added,
+            modified = gitsigns.changed,
+            removed = gitsigns.removed
+        }
     end
 end
 
---[[ local function diff_source() ]]
---[[     local gitsigns = vim.b.gitsigns_status_dict ]]
---[[     if gitsigns then ]]
---[[         return { ]]
---[[             added = gitsigns.added, ]]
---[[             modified = gitsigns.changed, ]]
---[[             removed = gitsigns.removed ]]
---[[         } ]]
---[[     end ]]
---[[ end ]]
+local navic = require("nvim-navic")
 local function get_cwd()
     local cwd = vim.fn.getcwd()
     local home = os.getenv("HOME")
@@ -1314,7 +1302,7 @@ local function get_cwd()
 end
 
 local mini_sections = {
-    lualine_a = { "filetype" },
+    lualine_a = { --[[ "filetype" ]] },
     lualine_b = {},
     lualine_c = {},
     lualine_x = {},
@@ -1323,12 +1311,27 @@ local mini_sections = {
 }
 local outline = {
     sections = mini_sections,
-    filetypes = { "lspsagaoutline" }
+    filetypes = {}
 }
 local diffview = {
     sections = mini_sections,
     filetypes = { "DiffviewFiles" }
 }
+
+local function search_result()
+    if vim.v.hlsearch == 0 then
+        return ''
+    end
+    local last_search = vim.fn.getreg('/')
+    if not last_search or last_search == '' then
+        return ''
+    end
+    local searchcount = vim.fn.searchcount { maxcount = 9999 }
+    return last_search .. '(' .. searchcount.current .. '/' .. searchcount.total .. ')'
+end
+local buffer_not_empty = function()
+    return vim.fn.empty(vim.fn.expand('%:t')) ~= 1
+end
 
 require("lualine").setup({
     options = {
@@ -1342,7 +1345,7 @@ require("lualine").setup({
     },
     sections = {
         lualine_a = { { "mode" } },
-        lualine_b = { { "branch" },
+        lualine_b = { { 'b:gitsigns_head', icon = '' },
             {
                 'diff',
                 -- Is it me or the symbol for modified us really weird
@@ -1352,10 +1355,15 @@ require("lualine").setup({
                     modified = { fg = colors.orange },
                     removed = { fg = colors.red },
                 },
+                source = diff_source
             }
         },
-        lualine_c = { lspsaga_symbols },
-        lualine_x = { {
+        lualine_c = { {
+            'filename',
+            cond = buffer_not_empty,
+            color = { fg = colors.magenta, gui = 'bold' },
+        } },
+        lualine_x = { { metals_stats }, {
             "diagnostics",
             sources = { "nvim_diagnostic" },
             symbols = {
@@ -1368,16 +1376,8 @@ require("lualine").setup({
             "filetype",
             colored = true,
             icon_only = true
-        }, { "encoding" }, {
-            "fileformat",
-            icons_enabled = true,
-            symbols = {
-                unix = "LF",
-                dos = "CRLF",
-                mac = "CR"
-            }
         } },
-        lualine_z = { "progress", "location" }
+        lualine_z = { --[[ "progress", "location" ]] }
     },
     inactive_sections = {
         lualine_a = {},
@@ -1510,10 +1510,50 @@ require("incline").setup({
 
 -- }}}
 -- LSP {{{
+require('nvim-lightbulb').setup({ autocmd = { enabled = true } })
+require("barbecue").setup()
+local glance = require('glance')
+glance.setup({
+    hooks = {
+        before_open = function(results, open, jump, method)
+            local uri = vim.uri_from_bufnr(0)
+            if #results == 1 then
+                local target_uri = results[1].uri or results[1].targetUri
 
-
+                if target_uri == uri then
+                    jump(results[1])
+                else
+                    open(results)
+                end
+            else
+                open(results)
+            end
+        end,
+    },
+})
 local function attached(client, bufnr)
-    local opts = { noremap = true, silent = false }
+    require("lsp_signature").on_attach({
+        bind = true, -- This is mandatory, otherwise border config won't get registered.
+        handler_opts = {
+            border = "rounded",
+        },
+    }, bufnr)
+    require("illuminate").on_attach(client)
+
+    if client.supports_method("textDocument/codeLens") then
+        require("virtualtypes").on_attach()
+    end
+    if client.supports_method("textDocument/formatting") then
+        vim.api.nvim_create_autocmd({ "BufWritePre" }, {
+            group   = vim.api.nvim_create_augroup("SharedLspFormatting", { clear = true }),
+            pattern = "*",
+            command = "lua vim.lsp.buf.format({async=false})",
+        })
+    end
+    client.server_capabilities.document_formatting = true
+    if client.server_capabilities.documentSymbolProvider then
+        navic.attach(client, bufnr)
+    end
     if client.name == "tsserver" or client.name == "jsonls" or client.name ==
         "nil" or client.name == "eslint" or client.name == "html" or
         client.name == "cssls" or client.name == "tailwindcss" then
@@ -1525,30 +1565,32 @@ local function attached(client, bufnr)
         client.server_capabilities.documentRangeFormattingProvider = true
         require("lsp-format").on_attach(client)
     end
-
-    print("LSP attached " .. client.name)
-
+    if client.server_capabilities.semanticTokensProvider and vim.lsp.semantic_tokens then
+        for _, clientI in ipairs(vim.lsp.get_active_clients()) do
+            if clientI.server_capabilities.semanticTokensProvider then
+                vim.lsp.semantic_tokens[vim.b.semantic_tokens_enabled and "start" or "stop"](bufnr or 0, clientI.id)
+            end
+        end
+    end
     vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
     vim.api.nvim_buf_set_option(bufnr, "tagfunc", "v:lua.vim.lsp.tagfunc")
 
-    map("n", "gd", "<cmd>Lspsaga lsp_finder<CR>", { desc = "Find symbol" })
-    map("n", "gp", "<cmd>Lspsaga peek_definition<CR>", { desc = "Peek symbol" })
+    map("n", "gd", "<cmd>Glance definitions<CR>", { desc = "Find symbol" })
+    map("n", "gp", "<cmd>lua vim.diagnostic.open_float()<CR>", { desc = "Peek symbol" })
     map("n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", { desc = "Go to declaration" })
-    map("n", "gr", "<cmd>Telescope lsp_references<CR>", { desc = "Go to References" })
-    map("n", "gt", "<cmd>Lspsaga goto_type_definition<CR>", { desc = "Go to type definition" })
-    map("n", "gl", "<cmd>Lspsaga show_line_diagnostics<CR>", { desc = "See Line diagnostics" })
-    map("n", "<leader>ca", "<cmd>Lspsaga code_action<CR>", { desc = "Show Code actions" })
-    map("n", "K", "<cmd>Lspsaga hover_doc ++quiet<CR>", { desc = "Show hover documentation" })
+    map("n", "gr", "<cmd>Glance references<CR>", { desc = "Go to References" })
+    map("n", "gt", "<cmd>Glance type_definitions<CR>", { desc = "Go to type definition" })
+    map("n", "gl", "<cmd>lua vim.diagnostic.open_float()<CR>", { desc = "See Line diagnostics" })
+    map("n", "<leader>ca", "<cmd>CodeActionMenu<CR>", { desc = "Show Code actions" })
+    map("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>", { desc = "Show hover documentation" })
     map("i", "<C-p>", "<cmd>lua require('lsp_signature').toggle_float_win()<CR>", { desc = "Show signature help" })
     map("n", "<C-p>", "<cmd>lua require('lsp_signature').toggle_float_win()<CR>", { desc = "Show signature help" })
     map("n", "<C-S-q>", "<cmd>Telescope aerial<CR>", { desc = "Search document symbols" })
     map("n", "<leader>cl", "<cmd>lua vim.lsp.codelens.run()<CR>", { desc = "Run codelens" })
-    map("n", "<leader>go", "<cmd>Lspsaga outline<CR>", { desc = "Show document outline" })
     map("n", "(d", '<cmd>lua vim.diagnostic.goto_prev({ border = "rounded" })<CR>', { desc = "Go to next error" })
     map("n", ")d", '<cmd>lua vim.diagnostic.goto_next({ border = "rounded" })<CR>', { desc = "Go to previous error" })
-    map("n", "<leader>=", "<cmd>lua vim.lsp.buf.formatting_sync()<CR>", { desc = "Format current file" })
+    map("n", "<leader>=", "<cmd>lua vim.lsp.buf.format({async=false})<CR>", { desc = "Format current file" })
     map("n", "gI", "<cmd>Telescope lsp_implementations<CR>", { desc = "Go to Implementation" })
-    map("v", "<leader>=", "<cmd>lua vim.lsp.buf.range_formatting()<CR>", { desc = "Format range" })
     vim.keymap.set("n", "<leader>cr", function()
         return ":IncRename " .. vim.fn.expand("<cword>")
     end, { expr = true, desc = "Rename" })
@@ -1557,6 +1599,8 @@ end
 -- LSP stuff - minimal with defaults for now
 local null_ls = require("null-ls")
 
+local null_helpers = require("null-ls.helpers")
+local null_methods = require("null-ls.methods")
 -- https://github.com/jose-elias-alvarez/null-ls.nvim/tree/main/lua/null-ls/builtins/formatting
 local formatting = null_ls.builtins.formatting
 -- https://github.com/jose-elias-alvarez/null-ls.nvim/tree/main/lua/null-ls/builtins/diagnostics
@@ -1586,6 +1630,26 @@ null_ls.setup {
         formatting.black,
         formatting.alejandra, -- for nix
         formatting.prismaFmt, -- for node prisma db orm
+
+        null_helpers.make_builtin({
+            method = null_methods.internal.FORMATTING,
+            filetypes = { "sql" },
+            generator_opts = {
+                to_stdin = true,
+                ignore_stderr = true,
+                suppress_errors = true,
+                command = "sqlfluff",
+                args = {
+                    "fix",
+                    "-",
+                },
+            },
+            factory = null_helpers.formatter_factory,
+        }),
+
+        null_ls.builtins.diagnostics.sqlfluff.with({
+            command = "sqlfluff",
+        }),
         formatting.prettier.with {
 
             -- extra_args = {
@@ -1655,6 +1719,21 @@ lspconfig.tailwindcss.setup {
 }
 -- nil_ls is a nix lsp
 lspconfig.nil_ls.setup { on_attach = attached, capabilities = capabilities }
+
+lspconfig.sqls.setup {
+    on_attach = function(client, bufnum)
+        client.server_capabilities.execute_command = true
+        attached(client, bufnum)
+        require 'sqls'.setup {}
+    end,
+    cmd = { "sqls", "-config", string.format("%s/.sqls-config.yml", vim.fn.getcwd()) }
+}
+
+lspconfig.hls.setup {
+    capabilities = capabilities,
+    on_attach = attached,
+    root_dir = lspconfig.util.root_pattern("hie.yaml", "stack.yaml", ".cabal", "cabal.project", "package.yaml"),
+}
 lspconfig.elixirls.setup { cmd = { "elixir-ls" }, on_attach = attached, capabilities = capabilities }
 lspconfig.prismals.setup { on_attach = attached, capabilities = capabilities }
 lspconfig.dockerls.setup { on_attach = attached, capabilities = capabilities }
@@ -1746,22 +1825,6 @@ lspconfig.gopls.setup({
     },
 })
 
-require("lspsaga").setup({
-    ui = {
-        winblend = 10,
-        border = "rounded"
-    },
-    rename = {
-        quit = "<C-c>",
-        exec = "<CR>",
-        mark = "x",
-        confirm = "<CR>",
-        in_select = false
-    },
-    symbol_in_winbar = {
-        enable = false
-    }
-})
 -- }}}
 -- Completions {{{
 
@@ -1866,44 +1929,42 @@ cmp.setup({
 })
 -- }}}
 --- Scala {{{
-
-local metals_config = require("metals").bare_config()
-
--- Example of settings
-metals_config.settings = {
-    showImplicitArguments = true,
-    --[[ excludedPackages = { "akka.actor.typed.javadsl", "com.github.swagger.akka.javadsl" }, ]]
-}
-
-
--- *READ THIS*
--- I *highly* recommend setting statusBarProvider to true, however if you do,
--- you *have* to have a setting to display this in your statusline or else
--- you'll not see any messages from metals. There is more info in the help
--- docs about this
-metals_config.init_options.statusBarProvider = "on"
-
--- Example if you are using cmp how to make sure the correct capabilities for snippets are set
-metals_config.capabilities = require("cmp_nvim_lsp").default_capabilities()
-
--- Debug settings if you're using nvim-dap
-metals_config.on_attach = function(client, bufnumber)
-    attached(client, bufnumber)
-    require("metals").setup_dap()
-end
-
 -- Autocmd that will actually be in charging of starting the whole thing
 local nvim_metals_group = vim.api.nvim_create_augroup("nvim-metals", { clear = true })
 vim.api.nvim_create_autocmd("FileType", {
     pattern = { "scala", "sbt" },
     callback = function()
+        local metals_config = require("metals").bare_config()
+        metals_config.init_options.statusBarProvider = "on"
+        metals_config.capabilities = require("cmp_nvim_lsp").default_capabilities()
+        -- Debug settings if you're using nvim-dap
+        metals_config.on_attach = function(client, bufnumber)
+            attached(client, bufnumber)
+            map('n', '<leader>cmc', '<cmd>lua require("metals").commands()<CR>', { desc = "Metals Commands" })
+            require("metals").setup_dap()
+        end
+        metals_config.settings = {
+            showImplicitArguments = true,
+            showImplicitConversionsAndClasses = true,
+            showInferredType = true,
+            excludedPackages = {
+                "akka.actor.typed.javadsl",
+                "com.github.swagger.akka.javadsl"
+            }
+        }
+        metals_config.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
+            vim.lsp.diagnostic.on_publish_diagnostics, {
+                virtual_text = {
+                    prefix = '',
+                }
+            }
+        )
         require("metals").initialize_or_attach(metals_config)
     end,
     group = nvim_metals_group,
 })
 --- }}}
 --- GoLang {{{
-
 local golang_group = vim.api.nvim_create_augroup("go.nvim", { clear = true })
 vim.api.nvim_create_autocmd("FileType", {
     pattern = { "go" },
@@ -1925,7 +1986,6 @@ vim.api.nvim_create_autocmd("FileType", {
                     t = { "<cmd>GoModTidy<cr>", "Go mod tidy" },
                     i = { "<cmd>GoModInit<cr>", "Go mod init" },
                 },
-                i = { "<cmd>GoToggleInlay<cr>", "Toggle inlay" },
                 l = { "<cmd>GoLint<cr>", "Run linter" },
                 o = { "<cmd>GoPkgOutline<cr>", "Outline" },
                 r = { "<cmd>GoRun<cr>", "Run" },
@@ -2061,3 +2121,25 @@ dap.configurations.scala = {
     },
 }
 --- }}}
+--- Haskell {{{
+
+local nvim_hask_group = vim.api.nvim_create_augroup("nvim-hask", { clear = true })
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = { "hs" },
+    callback = function()
+        local ht = require('haskell-tools')
+        local def_opts = { noremap = true, silent = true, }
+        ht.start_or_attach {
+            hls = {
+                on_attach = function(client, bufnrhl)
+                    attached(client, bufnrhl)
+                    local hlopts = vim.tbl_extend('keep', def_opts, { buffer = bufnrhl, })
+                    vim.keymap.set('n', '<space>ca', vim.lsp.codelens.run, hlopts)
+                    vim.keymap.set('n', '<space>cs', ht.hoogle.hoogle_signature, hlopts)
+                end,
+            },
+        }
+    end,
+    group = nvim_hask_group,
+})
+---}}}
