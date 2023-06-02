@@ -1671,7 +1671,9 @@ null_ls.setup {
         codeactions.eslint_d, codeactions.statix, -- for nix
         diagnostics.statix,                       -- for nix
         null_ls.builtins.hover.dictionary, codeactions.shellcheck,
-        diagnostics.shellcheck
+        diagnostics.shellcheck,
+        diagnostics.ktlint,
+        formatting.ktlint
         -- removed formatting.rustfmt since rust_analyzer seems to do the same thing
     },
     on_attach = attached
@@ -1737,6 +1739,7 @@ lspconfig.hls.setup {
 lspconfig.elixirls.setup { cmd = { "elixir-ls" }, on_attach = attached, capabilities = capabilities }
 lspconfig.prismals.setup { on_attach = attached, capabilities = capabilities }
 lspconfig.dockerls.setup { on_attach = attached, capabilities = capabilities }
+lspconfig.kotlin_language_server.setup { on_attach = attached, capabilities = capabilities }
 lspconfig.docker_compose_language_service.setup { on_attach = attached, capabilities = capabilities }
 lspconfig.cssls.setup {
     on_attach = attached,
