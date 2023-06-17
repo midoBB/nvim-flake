@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "align": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1668387361,
+        "narHash": "sha256-FqexLsG6PAslo2XeVLpFfThtNCrvwcytOEAaQcnJ/PQ=",
+        "owner": "Vonr",
+        "repo": "align.nvim",
+        "rev": "2004d263bb1b1ec28e55cf56c35944ec4ea23f8b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Vonr",
+        "repo": "align.nvim",
+        "type": "github"
+      }
+    },
     "barbacue-nvim": {
       "flake": false,
       "locked": {
@@ -130,22 +146,6 @@
         "type": "github"
       }
     },
-    "nvim-sqls": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1678906855,
-        "narHash": "sha256-YOCnl7pYF9gZpx6/+eeSpsv4c/TtCgUmKwPuV4k33U0=",
-        "owner": "nanotee",
-        "repo": "sqls.nvim",
-        "rev": "bb70de250433ca5f6f7b617a9b3f5ab02eccf861",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nanotee",
-        "repo": "sqls.nvim",
-        "type": "github"
-      }
-    },
     "oxocarbon": {
       "flake": false,
       "locked": {
@@ -178,6 +178,22 @@
         "type": "github"
       }
     },
+    "resession": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1684727996,
+        "narHash": "sha256-+NSbE773IF/rw0TUX81lIneWrdNfLhYqg8rYR07VLZE=",
+        "owner": "stevearc",
+        "repo": "resession.nvim",
+        "rev": "ad7bb9a522bae5254400da1797fd833f7d5790dc",
+        "type": "github"
+      },
+      "original": {
+        "owner": "stevearc",
+        "repo": "resession.nvim",
+        "type": "github"
+      }
+    },
     "reticle": {
       "flake": false,
       "locked": {
@@ -196,6 +212,7 @@
     },
     "root": {
       "inputs": {
+        "align": "align",
         "barbacue-nvim": "barbacue-nvim",
         "bufferline-cycle-windowless": "bufferline-cycle-windowless",
         "cutlass": "cutlass",
@@ -204,13 +221,14 @@
         "lsplens": "lsplens",
         "neovim-session-manager": "neovim-session-manager",
         "nixpkgs": "nixpkgs",
-        "nvim-sqls": "nvim-sqls",
         "oxocarbon": "oxocarbon",
         "persistent-breakpoints": "persistent-breakpoints",
+        "resession": "resession",
         "reticle": "reticle",
         "search-replace": "search-replace",
         "splitjoin": "splitjoin",
         "tabout": "tabout",
+        "textcase": "textcase",
         "typescript-nvim": "typescript-nvim",
         "virtual-types": "virtual-types",
         "windowsep": "windowsep",
@@ -262,6 +280,22 @@
       "original": {
         "owner": "abecodes",
         "repo": "tabout.nvim",
+        "type": "github"
+      }
+    },
+    "textcase": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1680808371,
+        "narHash": "sha256-bCyaS7a9k/yPM9+zqTpEn+5d9v3kGY+WpFm3TKjembs=",
+        "owner": "johmsalas",
+        "repo": "text-case.nvim",
+        "rev": "cd7cc65a412beb713e68f3b84e45990a939b7b6b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "johmsalas",
+        "repo": "text-case.nvim",
         "type": "github"
       }
     },

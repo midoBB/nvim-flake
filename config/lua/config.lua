@@ -193,6 +193,7 @@ local disabled_built_ins = { "2html_plugin", "getscript", "getscriptPlugin", "gz
 for _, plugin in pairs(disabled_built_ins) do
     vim.g["loaded_" .. plugin] = 1
 end
+vim.g.undotree_SetFocusWhenToggle = 1
 -- }}}
 -- Colorscheme / Visuals setup {{{
 pcall(vim.cmd, "colorscheme " .. "oxocarbon")
@@ -418,7 +419,7 @@ require("nvim-treesitter.configs").setup({
     }
 })
 
-require("hlargs").setup()
+--[[ require("hlargs").setup() ]]
 -- }}}
 -- Comments {{{
 
@@ -445,6 +446,88 @@ require("Comment").setup({
 
 -- }}}
 -- Autocmds {{{
+local augroup = vim.api.nvim_create_augroup
+local autocmd = vim.api.nvim_create_autocmd
+
+local view_group = augroup("auto_view", { clear = true })
+autocmd("BufWinEnter", {
+    desc = "Make q close help, man, quickfix, dap floats",
+    group = augroup("q_close_windows", { clear = true }),
+    callback = function(event)
+        local filetype = vim.api.nvim_get_option_value("filetype", { buf = event.buf })
+        local buftype = vim.api.nvim_get_option_value("buftype", { buf = event.buf })
+        if buftype == "nofile" or filetype == "help" then
+            vim.keymap.set("n", "q", "<cmd>close<cr>", {
+                desc = "Close window",
+                buffer = event.buf,
+                silent = true,
+                nowait = true,
+            })
+        end
+    end,
+})
+
+autocmd({ "BufWinLeave", "BufWritePost", "WinLeave" }, {
+    desc = "Save view with mkview for real files",
+    group = view_group,
+    callback = function(event)
+        if vim.b[event.buf].view_activated then vim.cmd.mkview { mods = { emsg_silent = true } } end
+    end,
+})
+autocmd("FileType", {
+    desc = "Unlist quickfist buffers",
+    group = augroup("unlist_quickfist", { clear = true }),
+    pattern = "qf",
+    callback = function() vim.opt_local.buflisted = false end,
+})
+autocmd("BufWinEnter", {
+    desc = "Try to load file view if available and enable view saving for real files",
+    group = view_group,
+    callback = function(event)
+        if not vim.b[event.buf].view_activated then
+            local filetype = vim.api.nvim_get_option_value("filetype", { buf = event.buf })
+            local buftype = vim.api.nvim_get_option_value("buftype", { buf = event.buf })
+            local ignore_filetypes = { "gitcommit", "gitrebase", "svg", "hgcommit" }
+            if buftype == "" and filetype and filetype ~= "" and not vim.tbl_contains(ignore_filetypes, filetype) then
+                vim.b[event.buf].view_activated = true
+                vim.cmd.loadview { mods = { emsg_silent = true } }
+            end
+        end
+    end,
+})
+
+local function get_session_name()
+    local name = vim.fn.getcwd()
+    local branch = vim.fn.system("git branch --show-current")
+    if vim.v.shell_error == 0 then
+        return name .. branch
+    else
+        return name
+    end
+end
+--[[ autocmd("VimLeavePre", {
+    desc = "Save session on close",
+    group = augroup("resession_auto_save", { clear = true }),
+    callback = function(event)
+        local filetype = vim.api.nvim_get_option_value("filetype", { buf = event.buf })
+        if not vim.tbl_contains({ "gitcommit", "gitrebase" }, filetype) then
+            local save = require("resession").save
+            save "Last Session"
+            save(get_session_name(), { dir = "dirsession", notify = false })
+        end
+    end,
+}) ]]
+
+--[[ autocmd("VimEnter", {
+    desc = "load session on open",
+    group = augroup("resession_auto_load", { clear = true }),
+    callback = function(_)
+        if vim.fn.argc(-1) == 0 then
+            require("resession").load(get_session_name(), { dir = "dirsession", silence_errors = true })
+        end
+    end,
+}) ]]
+
 vim.api.nvim_create_augroup("bufcheck", {
     clear = true
 })
@@ -456,6 +539,7 @@ vim.api.nvim_create_autocmd("FileType", {
     command = "startinsert | 1"
 })
 
+-- remove extra spaces when saving
 vim.api.nvim_create_autocmd("BufWritePre", {
     pattern = "*",
     command = ":%s/\\s\\+$//e"
@@ -570,7 +654,6 @@ require("cutlass").setup({
 -- }}}
 -- Small plugins setup {{{
 require("nvim-surround").setup({})
-require("splitjoin").setup({})
 require("nvim-autopairs").setup({})
 require("smart-splits").setup({})
 require("inc_rename").setup({})
@@ -578,6 +661,7 @@ require("fidget").setup({})
 require("reticle").setup({})
 require("aerial").setup({})
 require("hlslens").setup({})
+require("zen-mode").setup({})
 require("lsp-lens").setup({})
 require("colorful-winsep").setup({})
 -- }}}
@@ -670,12 +754,6 @@ map("n", "<C-l>", "<C-w>l")
 map("n", "<S-h>", "<cmd>BufferLineCycleWindowlessPrev<CR>")
 map("n", "<S-l>", "<cmd>BufferLineCycleWindowlessNext<CR>")
 -- Align
-map("x", "aw", "<cmd>lua require('align').align_to_string(false, true, true)<cr>", {
-    desc = "Align to words"
-})
-map("x", "as", "<cmd>lua require('align').align_to_char(1, true, true)<cr>", {
-    desc = "Align to a char"
-})
 map("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>")
 map("n", "<C-e>", '<cmd>lua require("harpoon.ui").toggle_quick_menu()<cr>')
 map("n", "<C-q>", "<cmd>AerialToggle!<CR>", { desc = "View document symbols" })
@@ -683,12 +761,7 @@ map("n", "<C-c>", "<cmd>lua ToggleQF('q')<CR>", { desc = "Toggle quickfix window
 map("v", "<C-r>", "<CMD>SearchReplaceSingleBufferVisualSelection<CR>", {
     desc = "Search and Replace"
 })
-map("n", "gj", "<cmd>lua require('splitjoin').join()<cr>", {
-    desc = "Join the object under cursor"
-})
-map("n", "g,", "<cmd>lua require('splitjoin').split()<cr>", {
-    desc = "Split the object under cursor"
-})
+map("n", "gx", "<cmd>execute '!xdg-open ' .. shellescape(expand('<cfile>'), v:true)<CR>", { desc = "Open Link" })
 local whichkey = require("which-key")
 local conf = {
     window = {
@@ -710,13 +783,17 @@ local mappings = {
     ["e"] = { "<cmd>NvimTreeToggle<cr>", "Explorer" },
     ["p"] = { '"+gp', "Paste from clipboard" },
     ["y"] = { '"+y', "Copy to clipboard" },
-    ["w"] = { "<cmd>update!<CR>", "Save" },
     ["<leader>q"] = { "<cmd>qa<CR>", "Quit" },
-    ["q"] = { "<cmd>Bdelete<CR>", "Close the current buffer" },
     b = {
         name = "+Buffer",
         c = { "<cmd>BufDelOthers<CR>", "Close the other buffers" },
-        f = { "<cmd>Telescope buffers<cr>", "Find buffer" },
+        b = { "<cmd>Telescope buffers<cr>", "Find buffer" },
+        d = { "<cmd>Bdelete<CR>", "Close the current buffer" },
+        s = { "<cmd>update!<CR>", "Save" },
+        m = { "<cmd>Noice<CR>", "open Messages bugger" },
+        a = { '<cmd>lua require("harpoon.mark").add_file()<cr>', "Add File to Harpoon" },
+        n = { "<cmd>BufferLineCycleWindowlessNext<CR>", "Next Buffer" },
+        p = { "<cmd>BufferLineCycleWindowlessPrev<CR>", "PreviousPreviousBuffer" },
     },
     d = {
         name = "+Debugging",
@@ -755,12 +832,6 @@ local mappings = {
         t = { "<cmd>Telescope live_grep<cr>", "Text" },
         T = { "<cmd>TodoTelescope<cr>", "Todos" },
     },
-    s = {
-        name = "+Split",
-        s = { "<cmd>split<CR>", "Split hortizentally" },
-        v = { "<cmd>vsplit<CR>", "Split Vertically" },
-        c = { "<cmd>close<CR>", "Close Split" },
-    },
     g = {
         name = "+Go to",
         f = { "<cmd>NvimTreeToggle<cr>", "file system" },
@@ -782,11 +853,6 @@ local mappings = {
         P = { "<cmd>Gitsigns preview_hunk_inline<cr>", "Preview Hunk" },
         b = { "<cmd>Gitsigns blame_line<cr>", "Git blame" },
     },
-    m = {
-        name = "+Harpoon",
-        a = { '<cmd>lua require("harpoon.mark").add_file()<cr>', "Add File" },
-        m = { '<cmd>lua require("harpoon.ui").toggle_quick_menu()<cr>', "Menu" },
-    },
     c = {
         name = "+Coding",
         A = {
@@ -796,6 +862,32 @@ local mappings = {
             t = { "<cmd>Neogen type<cr>", "Annotate type" },
             F = { "<cmd>Neogen file<cr>", "Annotate File" },
         },
+    },
+    x = {
+        name = "+Text",
+        i = {
+            name = "Case",
+            c = { "<cmd>lua require('textcase').current_word('to_camel_case')<cr>", "    To lowerCamelCase" },
+            C = { "<cmd>lua require('textcase').current_word('to_pascal_case')<cr>", "   To UpperCamelCase" },
+            k = { "<cmd>lua require('textcase').current_word('to_dash_case')<cr>", "     To kebab-case" },
+            u = { "<cmd>lua require('textcase').current_word('to_snake_case')<cr>", "    To under_score" },
+            U = { "<cmd>lua require('textcase').current_word('to_constant_case')<cr>", " To UP_CASE" },
+        }
+    },
+    w = {
+        name = "+Windows",
+        ["="] = { "<C-w>=", "Balance split windows" },
+        d = { "<cmd>close<CR>", "Delete a window" },
+        w = { "<C-w>|", "Max out the width" },
+        x = { "<C-w>_", "Max out the height" },
+        s = { "<cmd>split<CR>", "Split hortizentally" },
+        v = { "<cmd>vsplit<CR>", "Split Vertically" },
+        e = { "<C-w><C-r>", "Exchange current window with next one" },
+        j = { "<cmd>lua require('smart-splits').move_cursor_down()<cr>", "move to window below" },
+        k = { "<cmd>lua require('smart-splits').move_cursor_up()<cr>", "move to window above" },
+        l = { "<cmd>lua require('smart-splits').move_cursor_left()<cr>", "move to window on the right" },
+        h = { "<cmd>lua require('smart-splits').move_cursor_right()<cr>", "move to window on the left" },
+        c = { "<cmd>ZenMode<cr>", "Distraction-free reading" },
     },
 }
 
@@ -816,6 +908,18 @@ local vmappings = {
         s = { "<cmd>Gitsigns stage_hunk<cr>", "Stage hunk" },
         r = { "<cmd>Gitsigns reset_hunk<cr>", "Reset hunk" },
     },
+
+    x = {
+        name = "+Text",
+        a = {
+            name = "Align",
+            w = { "<cmd>lua require('align').align_to_string(false , true, true)<cr>", "To Word" },
+            s = { "<cmd>lua require('align').align_to_char(1, true, true)<cr>", "To char" }
+        },
+
+        u = { "gu", "lowercase" },
+        U = { "gU", "uppercase" },
+    }
 }
 whichkey.setup(conf)
 whichkey.register(mappings, opts)
@@ -1722,14 +1826,7 @@ lspconfig.tailwindcss.setup {
 -- nil_ls is a nix lsp
 lspconfig.nil_ls.setup { on_attach = attached, capabilities = capabilities }
 
-lspconfig.sqls.setup {
-    on_attach = function(client, bufnum)
-        client.server_capabilities.execute_command = true
-        attached(client, bufnum)
-        require 'sqls'.setup {}
-    end,
-    cmd = { "sqls", "-config", string.format("%s/.sqls-config.yml", vim.fn.getcwd()) }
-}
+
 
 lspconfig.hls.setup {
     capabilities = capabilities,

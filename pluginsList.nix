@@ -37,6 +37,7 @@ with pkgs.vimPlugins; [
   trouble-nvim
   todo-comments-nvim
   undotree
+  zen-mode-nvim
   # DAP
   nvim-dap
   nvim-dap-python
@@ -53,9 +54,10 @@ with pkgs.vimPlugins; [
   #Text maniupulation
   nvim-surround
   comment-nvim
-  splitjoin
   leap-nvim
   flit-nvim
+  align
+  textcase
   tabout # Tab out of the parantheses and quotes
   vim-repeat
   # Progrmming: Treesitter
@@ -74,6 +76,7 @@ with pkgs.vimPlugins; [
   vim-visual-multi # As the name suggests multi cursor support in vim
   vim-illuminate # Highlight the word under the cursor
   harpoon # Quickly change between most used files
+  align
   #Registers (Copy and Paste)
   yanky
   cutlass
@@ -100,7 +103,6 @@ with pkgs.vimPlugins; [
   inc-rename-nvim
   # Programming : Language support
   #SQL
-  nvim-sqls
   #Typescript
   typescript-nvim
   SchemaStore-nvim # json schemas
