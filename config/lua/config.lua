@@ -197,6 +197,11 @@ vim.g.undotree_SetFocusWhenToggle = 1
 -- }}}
 -- Colorscheme / Visuals setup {{{
 pcall(vim.cmd, "colorscheme " .. "oxocarbon")
+local function ColorMyPencils()
+    vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+    vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+end
+ColorMyPencils()
 vim.notify = require("notify")
 require("colorizer").setup()
 require("noice").setup({
